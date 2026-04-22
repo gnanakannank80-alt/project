@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>MPNMJEC – Attendance System</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<style>
+:root{
+  --primary:#1565c0;--primary-light:#1976d2;--primary-dark:#0d47a1;
+  --accent:#ff6f00;--accent-light:#ffa726;
+  --success:#2e7d32;--danger:#c62828;--warn:#f57f17;
+  --bg:#f0f4ff;--card:#fff;--text:#1a1a2e;--muted:#607080;
+  --border:#dde3f0;--nav-h:60px;--header-h:64px;
+  --shadow:0 2px 16px rgba(21,101,192,.12);
+}
+[data-theme="dark"]{
+  --bg:#0f1626;--card:#1a2440;--text:#e8eaf6;--muted:#8899bb;
+  --border:#253058;--shadow:0 2px 16px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+/* ─── SCREENS ─── */
+.screen{display:none;flex-direction:column;min-height:100vh;padding-bottom:var(--nav-h)}
+.screen.active{display:flex}
+/* ─── SPLASH ─── */
+#screen-splash{align-items:center;justify-content:center;background:linear-gradient(145deg,#0d47a1 0%,#1565c0 50%,#1976d2 100%)}
+.splash-logo{width:110px;height:110px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 0 0 12px rgba(255,255,255,.15)}
+.splash-logo i{font-size:54px;color:var(--primary-dark)}
+.splash-title{color:#fff;font-family:'Rajdhani',sans-serif;font-size:22px;text-align:center;line-height:1.3;padding:0 20px}
+.splash-sub{color:rgba(255,255,255,.7);font-size:13px;text-align:center;margin-top:8px;padding:0 30px}
+.splash-bar{width:120px;height:4px;background:rgba(255,255,255,.2);border-radius:4px;margin-top:32px;overflow:hidden}
+.splash-fill{height:100%;background:#fff;border-radius:4px;animation:fill 2.5s linear forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+/* ─── HEADER ─── */
+.app-header{background:var(--primary);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.app-header .logo-sm{width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.app-header h1{font-size:12px;font-weight:600;line-height:1.3}
+.app-header h2{font-size:10px;font-weight:400;opacity:.8;line-height:1.3}
+.header-right{margin-left:auto;display:flex;gap:8px}
+.icon-btn{width:34px;height:34px;background:rgba(255,255,255,.15);border:none;border-radius:50%;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s}
+.icon-btn:active{background:rgba(255,255,255,.3)}
+/* ─── BOTTOM NAV ─── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--card);border-top:1px solid var(--border);display:flex;z-index:200;box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:500;transition:.2s;border:none;background:none}
+.nav-item i{font-size:20px}
+.nav-item.active{color:var(--primary)}
+/* ─── LOGIN PAGE ─── */
+#screen-login{align-items:stretch;justify-content:flex-start;background:var(--bg)}
+.login-body{padding:20px 16px;flex:1}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.role-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:18px 12px;text-align:center;cursor:pointer;transition:.2s;box-shadow:var(--shadow)}
+.role-card.selected{border-color:var(--primary);background:#e3f0ff}
+[data-theme="dark"] .role-card.selected{background:#1a2e50}
+.role-card i{font-size:28px;color:var(--primary);margin-bottom:8px;display:block}
+.role-card span{font-size:13px;font-weight:600}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:15px;font-family:'Poppins',sans-serif;outline:none;transition:.2s}
+.form-group input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(21,101,192,.1)}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;font-family:'Poppins',sans-serif}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 4px 12px rgba(21,101,192,.3)}
+.btn-primary:active{transform:scale(.98)}
+.btn-danger{background:linear-gradient(135deg,var(--danger),#e53935);color:#fff}
+.btn-success{background:linear-gradient(135deg,var(--success),#43a047);color:#fff}
+.error-msg{color:var(--danger);font-size:12px;margin-top:8px;display:none;text-align:center}
+/* ─── DASHBOARD ─── */
+.dash-body{padding:16px;flex:1;overflow-y:auto}
+.welcome-card{background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:16px;padding:20px;margin-bottom:20px;color:#fff}
+.welcome-card h3{font-size:18px;font-weight:700}
+.welcome-card p{font-size:12px;opacity:.85;margin-top:4px}
+.role-badge{display:inline-block;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;margin-top:8px;font-weight:600}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.menu-card{background:var(--card);border-radius:16px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;box-shadow:var(--shadow);border:1.5px solid var(--border);transition:.2s}
+.menu-card:active{transform:scale(.96)}
+.menu-card .mc-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.mc-blue{background:#e3f0ff;color:#1565c0}
+.mc-orange{background:#fff3e0;color:#e65100}
+.mc-green{background:#e8f5e9;color:#2e7d32}
+.mc-purple{background:#f3e5f5;color:#6a1b9a}
+.menu-card span{font-size:13px;font-weight:600;text-align:center}
+/* ─── SECTION PAGES ─── */
+.page-header{background:var(--primary);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.back-btn{width:34px;height:34px;background:rgba(255,255,255,.15);border:none;border-radius:50%;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+.page-header h2{font-size:16px;font-weight:700}
+.page-body{padding:16px;flex:1;overflow-y:auto}
+/* ─── CARDS ─── */
+.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card h4{font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text)}
+/* ─── CIRCLE PROGRESS ─── */
+.circle-wrap{display:flex;flex-direction:column;align-items:center;margin:16px 0}
+.circle-progress{position:relative;width:120px;height:120px}
+.circle-progress svg{transform:rotate(-90deg)}
+.circle-bg{fill:none;stroke:var(--border);stroke-width:10}
+.circle-fg{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+.circle-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.circle-text .pct{font-size:24px;font-weight:700;color:var(--text)}
+.circle-text .lbl{font-size:10px;color:var(--muted)}
+/* ─── TABLE ─── */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--primary);color:#fff;padding:10px 8px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:rgba(21,101,192,.03)}
+/* ─── TAGS ─── */
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.tag-present{background:#e8f5e9;color:#2e7d32}
+.tag-absent{background:#ffebee;color:#c62828}
+.tag-od{background:#e3f2fd;color:#1565c0}
+.tag-pass{background:#e8f5e9;color:#2e7d32}
+.tag-fail{background:#ffebee;color:#c62828}
+/* ─── SELECT ─── */
+select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:14px;font-family:'Poppins',sans-serif;outline:none;margin-bottom:12px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23607080' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+/* ─── SEARCH BAR ─── */
+.search-bar{position:relative;margin-bottom:14px}
+.search-bar input{width:100%;padding:11px 14px 11px 40px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:14px;font-family:'Poppins',sans-serif;outline:none}
+.search-bar i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px}
+/* ─── ATTENDANCE LIST ─── */
+.att-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.att-item:last-child{border-bottom:none}
+.att-info{flex:1}
+.att-name{font-size:13px;font-weight:600}
+.att-sub{font-size:11px;color:var(--muted)}
+.att-actions{display:flex;gap:6px}
+.att-btn{padding:5px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;background:var(--card);color:var(--text);transition:.15s}
+.att-btn.active-p{background:#e8f5e9;border-color:#2e7d32;color:#2e7d32}
+.att-btn.active-a{background:#ffebee;border-color:#c62828;color:#c62828}
+.att-btn.active-od{background:#e3f2fd;border-color:#1565c0;color:#1565c0}
+/* ─── TIMETABLE ─── */
+.tt-table{font-size:11px}
+.tt-table th,.tt-table td{text-align:center;min-width:70px;padding:7px 4px}
+/* ─── IAT ─── */
+.iat-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.iat-item:last-child{border-bottom:none}
+.iat-mark{width:50px}
+.iat-mark input{width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:13px;text-align:center;font-family:'Poppins',sans-serif;outline:none}
+/* ─── CALENDAR ─── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-head{font-size:10px;font-weight:700;color:var(--muted);padding:4px 0}
+.cal-day{font-size:11px;padding:6px 2px;border-radius:6px;cursor:pointer;font-weight:500}
+.cal-day.absent{background:#ffebee;color:#c62828}
+.cal-day.od{background:#e3f2fd;color:#1565c0}
+.cal-day.present{background:#e8f5e9;color:#2e7d32}
+.cal-day.today{font-weight:700;border:2px solid var(--primary)}
+.cal-day.empty{opacity:0}
+/* ─── REPORT ─── */
+.stat-row{display:flex;gap:10px;margin-bottom:14px}
+.stat-box{flex:1;background:var(--card);border-radius:12px;padding:12px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border)}
+.stat-box .sv{font-size:22px;font-weight:700;color:var(--primary)}
+.stat-box .sl{font-size:11px;color:var(--muted)}
+/* ─── SETTINGS ─── */
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-label{font-size:14px;font-weight:600}
+.settings-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:46px;height:26px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:30px;transition:.3s;cursor:pointer}
+.toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--primary)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(20px)}
+/* ─── TOAST ─── */
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(20px);background:#323232;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:.3s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ─── MODAL ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:20px 20px 0 0;padding:24px 20px;width:100%;max-height:85vh;overflow-y:auto}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:16px;text-align:center}
+/* ─── MISC ─── */
+.section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+.chip.sel{background:var(--primary);border-color:var(--primary);color:#fff}
+.absent-list li{font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);list-style:none}
+.bar-wrap{margin-top:10px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-label{font-size:11px;width:50px;color:var(--muted);text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:var(--border);border-radius:4px;height:14px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.bar-val{font-size:11px;font-weight:700;width:28px;flex-shrink:0}
+.loading{text-align:center;padding:30px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- ████ SPLASH ████ -->
+<div id="screen-splash" class="screen active" style="padding-bottom:0">
+  <div class="splash-logo"><i class="fas fa-university"></i></div>
+  <div class="splash-title">M.P. NACHIMUTHU M. JAGANADHAN<br>ENGINEERING COLLEGE</div>
+  <div class="splash-sub">Erode-Chennimalai Rd, Erode, Tamil Nadu 638112</div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
+
+<!-- ████ LOGIN ████ -->
+<div id="screen-login" class="screen">
+  <div class="app-header">
+    <div class="logo-sm"><i class="fas fa-university" style="color:#fff;font-size:18px"></i></div>
+    <div><h1>MPNMJEC</h1><h2>Attendance System</h2></div>
+  </div>
+  <div class="login-body">
+    <p class="section-title" style="margin-bottom:14px">What is your role?</p>
+    <div class="role-grid" id="roleGrid">
+      <div class="role-card" data-role="student" onclick="selectRole('student',this)"><i class="fas fa-user-graduate"></i><span>Student</span></div>
+      <div class="role-card" data-role="staff" onclick="selectRole('staff',this)"><i class="fas fa-chalkboard-teacher"></i><span>Staff</span></div>
+      <div class="role-card" data-role="hod" onclick="selectRole('hod',this)"><i class="fas fa-user-tie"></i><span>HOD</span></div>
+      <div class="role-card" data-role="principal" onclick="selectRole('principal',this)"><i class="fas fa-user-shield"></i><span>Principal</span></div>
+    </div>
+    <div id="loginForm" style="display:none">
+      <div class="form-group" id="fgUser"><label id="userLabel">Username</label><input type="text" id="inUser" placeholder="Enter here"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="inPass" placeholder="Enter password"/></div>
+      <p class="error-msg" id="loginErr">Invalid credentials</p>
+      <button class="btn btn-primary" onclick="doLogin()">Login &nbsp;<i class="fas fa-sign-in-alt"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ STUDENT DASHBOARD ████ -->
+<div id="screen-student" class="screen">
+  <div class="app-header">
+    <div class="logo-sm"><i class="fas fa-user-graduate" style="color:#fff;font-size:16px"></i></div>
+    <div><h1 id="stdHdrName">Student</h1><h2>Student Portal</h2></div>
+    <div class="header-right"><button class="icon-btn" onclick="showSettings()"><i class="fas fa-cog"></i></button></div>
+  </div>
+  <div class="dash-body">
+    <div class="welcome-card">
+      <h3 id="stdWelcome">Welcome!</h3>
+      <p id="stdRegNo">Reg No: –</p>
+      <span class="role-badge">Student | CSE</span>
+    </div>
+    <p class="section-title">Menu</p>
+    <div class="menu-grid">
+      <div class="menu-card" onclick="showStudentAttendance()"><div class="mc-icon mc-blue"><i class="fas fa-calendar-check"></i></div><span>Attendance</span></div>
+      <div class="menu-card" onclick="showTimetable('student')"><div class="mc-icon mc-orange"><i class="fas fa-table"></i></div><span>Time Table</span></div>
+      <div class="menu-card" onclick="showStudentIAT(1)"><div class="mc-icon mc-green"><i class="fas fa-file-alt"></i></div><span>IAT – 1</span></div>
+      <div class="menu-card" onclick="showStudentIAT(2)"><div class="mc-icon mc-purple"><i class="fas fa-file-alt"></i></div><span>IAT – 2</span></div>
+    </div>
+  </div>
+  <div id="snav" class="bottom-nav">
+    <button class="nav-item active" onclick="showScreen('student')"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ████ STAFF DASHBOARD ████ -->
+<div id="screen-staff" class="screen">
+  <div class="app-header">
+    <div class="logo-sm"><i class="fas fa-chalkboard-teacher" style="color:#fff;font-size:14px"></i></div>
+    <div><h1 id="staffHdrName">Staff</h1><h2>Staff Portal</h2></div>
+    <div class="header-right"><button class="icon-btn" onclick="showSettings()"><i class="fas fa-cog"></i></button></div>
+  </div>
+  <div class="dash-body">
+    <div class="welcome-card">
+      <h3 id="staffWelcome">Welcome!</h3>
+      <p>CSE Department</p>
+      <span class="role-badge">Staff</span>
+    </div>
+    <p class="section-title">Menu</p>
+    <div class="menu-grid">
+      <div class="menu-card" onclick="showStaffAttendance()"><div class="mc-icon mc-blue"><i class="fas fa-calendar-check"></i></div><span>Mark Attendance</span></div>
+      <div class="menu-card" onclick="showTimetable('staff')"><div class="mc-icon mc-orange"><i class="fas fa-table"></i></div><span>Time Table</span></div>
+      <div class="menu-card" onclick="showStaffIAT(1)"><div class="mc-icon mc-green"><i class="fas fa-file-alt"></i></div><span>IAT – 1</span></div>
+      <div class="menu-card" onclick="showStaffIAT(2)"><div class="mc-icon mc-purple"><i class="fas fa-file-alt"></i></div><span>IAT – 2</span></div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="showScreen('staff')"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ████ HOD DASHBOARD ████ -->
+<div id="screen-hod" class="screen">
+  <div class="app-header">
+    <div class="logo-sm"><i class="fas fa-user-tie" style="color:#fff;font-size:14px"></i></div>
+    <div><h1>K.N. SIVAKUMAR</h1><h2>HOD Portal</h2></div>
+    <div class="header-right"><button class="icon-btn" onclick="showSettings()"><i class="fas fa-cog"></i></button></div>
+  </div>
+  <div class="dash-body">
+    <div class="welcome-card">
+      <h3>Welcome, HOD!</h3>
+      <p>CSE Department</p>
+      <span class="role-badge">HOD</span>
+    </div>
+    <p class="section-title">Menu</p>
+    <div class="menu-grid">
+      <div class="menu-card" onclick="showHodAttendance()"><div class="mc-icon mc-blue"><i class="fas fa-calendar-check"></i></div><span>Attendance</span></div>
+      <div class="menu-card" onclick="showTimetable('hod')"><div class="mc-icon mc-orange"><i class="fas fa-table"></i></div><span>Time Table</span></div>
+      <div class="menu-card" onclick="showHodIAT()"><div class="mc-icon mc-green"><i class="fas fa-file-alt"></i></div><span>IAT Reports</span></div>
+      <div class="menu-card" onclick="showReport()"><div class="mc-icon mc-purple"><i class="fas fa-chart-bar"></i></div><span>Report</span></div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="showScreen('hod')"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ████ PRINCIPAL DASHBOARD ████ -->
+<div id="screen-principal" class="screen">
+  <div class="app-header">
+    <div class="logo-sm"><i class="fas fa-user-shield" style="color:#fff;font-size:14px"></i></div>
+    <div><h1>DR. RAMESH</h1><h2>Principal Portal</h2></div>
+    <div class="header-right"><button class="icon-btn" onclick="showSettings()"><i class="fas fa-cog"></i></button></div>
+  </div>
+  <div class="dash-body">
+    <div class="welcome-card">
+      <h3>Welcome, Principal!</h3>
+      <p>M.P. NACHIMUTHU M. JAGANADHAN ENGINEERING COLLEGE</p>
+      <span class="role-badge">Principal</span>
+    </div>
+    <p class="section-title">Menu</p>
+    <div class="menu-grid">
+      <div class="menu-card" onclick="showPrincipalAttendance()"><div class="mc-icon mc-blue"><i class="fas fa-calendar-check"></i></div><span>Attendance</span></div>
+      <div class="menu-card" onclick="showTimetable('principal')"><div class="mc-icon mc-orange"><i class="fas fa-table"></i></div><span>Time Table</span></div>
+      <div class="menu-card" onclick="showHodIAT()"><div class="mc-icon mc-green"><i class="fas fa-file-alt"></i></div><span>IAT Reports</span></div>
+      <div class="menu-card" onclick="showReport()"><div class="mc-icon mc-purple"><i class="fas fa-chart-bar"></i></div><span>Full Report</span></div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="showScreen('principal')"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ████ SUB-SCREENS ████ -->
+
+<!-- Student Attendance -->
+<div id="screen-std-att" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>My Attendance</h2></div>
+  <div class="page-body" id="stdAttBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- Timetable -->
+<div id="screen-timetable" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Time Table</h2><span id="ttEditBtn" style="margin-left:auto"></span></div>
+  <div class="page-body" id="ttBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- Student IAT -->
+<div id="screen-std-iat" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2 id="stdIatTitle">IAT Marks</h2></div>
+  <div class="page-body" id="stdIatBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- Staff Attendance -->
+<div id="screen-staff-att" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Mark Attendance</h2></div>
+  <div class="page-body" id="staffAttBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- Staff IAT -->
+<div id="screen-staff-iat" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2 id="staffIatTitle">Enter IAT Marks</h2></div>
+  <div class="page-body" id="staffIatBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- HOD Attendance -->
+<div id="screen-hod-att" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Attendance (HOD View)</h2></div>
+  <div class="page-body" id="hodAttBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- HOD IAT -->
+<div id="screen-hod-iat" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>IAT Reports</h2></div>
+  <div class="page-body" id="hodIatBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- Report -->
+<div id="screen-report" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Report</h2></div>
+  <div class="page-body" id="reportBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item active" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- Settings -->
+<div id="screen-settings" class="screen">
+  <div class="page-header"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Settings</h2></div>
+  <div class="page-body" id="settingsBody"></div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="goBack()"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" onclick="showReport()"><i class="fas fa-chart-bar"></i><span>Report</span></button>
+    <button class="nav-item active" onclick="showSettings()"><i class="fas fa-cog"></i><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════
+const STUDENTS = {
+  '2': [
+    {id:'731724104001',name:'ABBU G YUVARAJ'},{id:'731724104002',name:'ABINAYA S'},
+    {id:'731724104003',name:'ABINAYA V'},{id:'731724104004',name:'ARAVINDHAN K'},
+    {id:'731724104005',name:'ARCHANA J'},{id:'731724104006',name:'AYESHA REENA S'},
+    {id:'731724104007',name:'BHARANI P'},{id:'731724104009',name:'DEEPA K'},
+    {id:'731724104010',name:'DEEPIKA K'},{id:'731724104011',name:'DEVADHARSHINI B'},
+    {id:'731724104012',name:'ELAMATHI V R'},{id:'731724104013',name:'GAYATHRI K'},
+    {id:'731724104014',name:'GNANAKANNAN K'},{id:'731724104015',name:'GOKUL PRASAD K'},
+    {id:'731724104016',name:'GUNARANJANI A'},{id:'731724104017',name:'GUNASREE S'},
+    {id:'731724104018',name:'INDHUMATHI K'},{id:'731724104019',name:'JAYAKUMAR J'},
+    {id:'731724104020',name:'KAVINPRIYAN M'},{id:'731724104021',name:'KAVITHA P'},
+    {id:'731724104022',name:'KAVYA K'},{id:'731724104023',name:'KRISHNASAMY K'},
+    {id:'731724104024',name:'MAHALAKSHMI K'},{id:'731724104025',name:'MALAR VIZHI N'},
+    {id:'731724104026',name:'MUTHULA E'},{id:'731724104027',name:'MONIKA S'},
+    {id:'731724104028',name:'MYTHILI M'},{id:'731724104029',name:'NANDHINI R'},
+    {id:'731724104030',name:'PAVITHRA B'},{id:'731724104031',name:'PONRAJ P'},
+    {id:'731724104032',name:'POOJASHREE P'},{id:'731724104033',name:'PRAKASH V'},
+    {id:'731724104034',name:'PRIYADHARSHINI C'},{id:'731724104035',name:'SABANA S'},
+    {id:'731724104036',name:'SABARISH P'},{id:'731724104037',name:'SABARISHANKAR K'},
+    {id:'731724104038',name:'SADHISH P'},{id:'731724104039',name:'SATHISH M'},
+    {id:'731724104040',name:'SAUBAL B'},{id:'731724104042',name:'SHARMILA A'},
+    {id:'731724104043',name:'SHOBANA B S'},{id:'731724104044',name:'SRIJA V'},
+    {id:'731724104045',name:'SUTHESH M'},{id:'731724104046',name:'THAVAGAR T'},
+    {id:'731724104047',name:'THENNARASU G'},{id:'731724104048',name:'VAASHINI S'},
+    {id:'731724104049',name:'VIDHYA V'},{id:'731724104050',name:'VIMAL S'},
+    {id:'731724104051',name:'YAZHINI'},{id:'731724104052',name:'YOGESHWARI G'},
+    {id:'731724104053',name:'YUKESH M'}
+  ],
+  '3': [
+    {id:'731723104001',name:'YUVARAJ'},{id:'731723104002',name:'ABINA'},
+    {id:'731723104003',name:'ANAYA V'},{id:'731723104004',name:'ARAHAN'}
+  ],
+  '4': [
+    {id:'731722104001',name:'ROJA'},{id:'731722104002',name:'POOJA'},
+    {id:'731722104003',name:'RAJU'},{id:'731722104004',name:'MANHA'}
+  ]
+};
+
+const STAFF_USERS = ['d.suganthi','s.raghul','n.ashok kumar','k.n.sivakumar',
+  'b.yuva raj','k.singaravelan','s.dineshkumar','a.nooralshaba','k.r.mohanapriya'];
+
+const SUBJECTS = {
+  '2': [{code:'CS2301',name:'Data Structures'},{code:'CS2302',name:'DBMS'},{code:'CS2303',name:'OS'},
+         {code:'CS2304',name:'Computer Networks'},{code:'CS2305',name:'Web Technology'}],
+  '3': [{code:'CS3301',name:'Software Engineering'},{code:'CS3302',name:'Compiler Design'},
+         {code:'CS3303',name:'Machine Learning'},{code:'CS3304',name:'Cloud Computing'}],
+  '4': [{code:'CS4301',name:'Cryptography'},{code:'CS4302',name:'Big Data'},{code:'CS4303',name:'IoT'}]
+};
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const HOURS = ['8:00','9:00','10:00','11:00','12:00','1:00','2:00','3:00'];
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let currentRole = '', currentUser = '', currentRegno = '', prevScreen = '';
+let attData = {}, iatData = {}, ttData = {};
+let darkMode = false;
+
+function ls(k,v){if(v===undefined)return JSON.parse(localStorage.getItem(k)||'null');localStorage.setItem(k,JSON.stringify(v))}
+
+function loadState(){
+  attData = ls('att') || {};
+  iatData = ls('iat') || {};
+  ttData = ls('tt') || buildDefaultTT();
+  darkMode = ls('dark') || false;
+  if(darkMode) document.documentElement.setAttribute('data-theme','dark');
+}
+
+function buildDefaultTT(){
+  const t={};
+  ['2','3','4'].forEach(yr=>{
+    t[yr]={};
+    DAYS.forEach(d=>{
+      t[yr][d]={};
+      HOURS.forEach((h,i)=>{
+        const sub = SUBJECTS[yr][i%SUBJECTS[yr].length];
+        const staff = STAFF_USERS[i%STAFF_USERS.length];
+        t[yr][d][h]={code:sub.code,name:sub.name,staff};
+      });
+    });
+  });
+  return t;
+}
+
+// ════════════════════════════════════════════
+//  SPLASH
+// ════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  loadState();
+  setTimeout(()=>{showScreen('login');},2800);
+});
+
+// ════════════════════════════════════════════
+//  SCREEN NAV
+// ════════════════════════════════════════════
+function showScreen(id){
+  prevScreen = document.querySelector('.screen.active')?.id.replace('screen-','')||'';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goBack(){
+  if(prevScreen) showScreen(prevScreen);
+  else showScreen(currentRole);
+}
+
+// ════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════
+function selectRole(role, el){
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  currentRole = role;
+  document.getElementById('loginForm').style.display='block';
+  const lbl = document.getElementById('userLabel');
+  const uf = document.getElementById('fgUser');
+  if(role==='student'){lbl.textContent='Register Number'; uf.style.display='block';}
+  else{lbl.textContent='Username'; uf.style.display='block';}
+  document.getElementById('inUser').value='';
+  document.getElementById('inPass').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+function doLogin(){
+  const u = document.getElementById('inUser').value.trim().toLowerCase();
+  const p = document.getElementById('inPass').value.trim();
+  const err = document.getElementById('loginErr');
+  err.style.display='none';
+
+  if(currentRole==='student'){
+    const allS=[...STUDENTS['2'],...STUDENTS['3'],...STUDENTS['4']];
+    const found=allS.find(s=>s.id===u||s.id.toLowerCase()===u);
+    if(!found){err.textContent='Invalid Register Number';err.style.display='block';return;}
+    if(p!=='cc2cse'){err.textContent='Wrong Password';err.style.display='block';return;}
+    currentUser=found.name; currentRegno=found.id;
+    document.getElementById('stdHdrName').textContent=found.name;
+    document.getElementById('stdWelcome').textContent='Hello, '+found.name+'!';
+    document.getElementById('stdRegNo').textContent='Reg No: '+found.id;
+    showScreen('student');
+  } else if(currentRole==='staff'){
+    if(!STAFF_USERS.includes(u)||p!=='235689'){err.textContent='Invalid login';err.style.display='block';return;}
+    currentUser=u;
+    document.getElementById('staffHdrName').textContent=u.toUpperCase();
+    document.getElementById('staffWelcome').textContent='Hello, '+u+'!';
+    showScreen('staff');
+  } else if(currentRole==='hod'){
+    if(u!=='k.n.sivakumar'||p!=='hod@cse'){err.textContent='Invalid login';err.style.display='block';return;}
+    currentUser=u; showScreen('hod');
+  } else if(currentRole==='principal'){
+    if(u!=='dr.ramesh'||p!=='mpnmj@cse'){err.textContent='Invalid login';err.style.display='block';return;}
+    currentUser=u; showScreen('principal');
+  }
+}
+
+// ════════════════════════════════════════════
+//  STUDENT ATTENDANCE
+// ════════════════════════════════════════════
+function showStudentAttendance(){
+  prevScreen=currentRole;
+  const body=document.getElementById('stdAttBody');
+  // get this student's data across all records
+  const reg=currentRegno;
+  let total=0,present=0,absentDates=[],odDates=[];
+  Object.keys(attData).forEach(dateKey=>{
+    ['morning','afternoon'].forEach(ses=>{
+      const rec=attData[dateKey]?.[ses];
+      if(!rec) return;
+      const entry=rec.find(r=>r.id===reg);
+      if(!entry) return;
+      total++;
+      if(entry.status==='A'){absentDates.push(dateKey+' '+ses);}
+      else if(entry.status==='OD'){odDates.push(dateKey+' '+ses);}
+      else present++;
+    });
+  });
+  // mock some data if none
+  if(total===0){total=40;present=32;absentDates=['2025-01-10 morning','2025-01-15 afternoon'];odDates=['2025-01-20 morning'];}
+  const pct=total?Math.round(present/total*100):0;
+  const r=54,circ=2*Math.PI*r;
+  const dashOffset=circ-(pct/100)*circ;
+  const col=pct>=75?'#2e7d32':pct>=60?'#f57f17':'#c62828';
+
+  body.innerHTML=`
+  <div class="card">
+    <h4><i class="fas fa-chart-pie" style="color:var(--primary)"></i> Attendance Overview</h4>
+    <div class="circle-wrap">
+      <div class="circle-progress">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="circle-bg" cx="60" cy="60" r="${r}"/>
+          <circle class="circle-fg" cx="60" cy="60" r="${r}" stroke="${col}"
+            stroke-dasharray="${circ}" stroke-dashoffset="${dashOffset}"/>
+        </svg>
+        <div class="circle-text"><span class="pct">${pct}%</span><span class="lbl">Present</span></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-around;margin-top:10px">
+      <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#2e7d32">${present}</div><div style="font-size:11px;color:var(--muted)">Present</div></div>
+      <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#c62828">${absentDates.length}</div><div style="font-size:11px;color:var(--muted)">Absent</div></div>
+      <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#1565c0">${odDates.length}</div><div style="font-size:11px;color:var(--muted)">On Duty</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h4><i class="fas fa-times-circle" style="color:#c62828"></i> Absent Dates</h4>
+    <ul class="absent-list">${absentDates.length?absentDates.map(d=>`<li>${d}</li>`).join(''):'<li>No absent records</li>'}</ul>
+  </div>
+  <div class="card">
+    <h4><i class="fas fa-info-circle" style="color:#1565c0"></i> On Duty Dates</h4>
+    <ul class="absent-list">${odDates.length?odDates.map(d=>`<li>${d}</li>`).join(''):'<li>No OD records</li>'}</ul>
+  </div>`;
+  showScreen('std-att');
+}
+
+// ════════════════════════════════════════════
+//  TIMETABLE
+// ════════════════════════════════════════════
+function showTimetable(role){
+  prevScreen=role;
+  const body=document.getElementById('ttBody');
+  const editBtn=document.getElementById('ttEditBtn');
+  editBtn.innerHTML='';
+
+  const makeTable=(yr)=>{
+    const tt=ttData[yr]||{};
+    let html=`<div class="card"><h4>CSE ${yr}${yr==='2'?'nd':yr==='3'?'rd':'th'} Year</h4><div class="tbl-wrap"><table class="tt-table"><thead><tr><th>Day/Hr</th>${HOURS.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+    DAYS.forEach(d=>{
+      html+=`<tr><td style="font-weight:700;white-space:nowrap">${d.slice(0,3)}</td>`;
+      HOURS.forEach(h=>{
+        const c=tt[d]?.[h];
+        html+=`<td style="cursor:${role==='hod'?'pointer':'default'}" ${role==='hod'?`onclick="editCell('${yr}','${d}','${h}')"`:''}>${c?`<b>${c.code}</b><br><span style="color:var(--muted);font-size:9px">${c.name}</span><br><span style="color:var(--primary);font-size:9px">${c.staff}</span>`:'–'}</td>`;
+      });
+      html+=`</tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+    return html;
+  };
+
+  if(role==='student'){
+    const yr=currentRegno.startsWith('731724')?'2':currentRegno.startsWith('731723')?'3':'4';
+    body.innerHTML=makeTable(yr);
+  } else {
+    body.innerHTML=`<div class="chip-row" id="ttYrChip">
+      <div class="chip sel" onclick="switchTTYear('2',this)">2nd Year</div>
+      <div class="chip" onclick="switchTTYear('3',this)">3rd Year</div>
+      <div class="chip" onclick="switchTTYear('4',this)">4th Year</div>
+    </div><div id="ttContent">${makeTable('2')}</div>`;
+  }
+  if(role==='hod'){
+    editBtn.innerHTML=`<span style="font-size:11px;color:rgba(255,255,255,.7);font-weight:600">Tap cell to edit</span>`;
+  }
+  showScreen('timetable');
+}
+window.switchTTYear=function(yr,el){
+  document.querySelectorAll('#ttYrChip .chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('ttContent').innerHTML=buildTTTable(yr);
+};
+function buildTTTable(yr){
+  const tt=ttData[yr]||{};
+  let html=`<div class="card"><h4>CSE ${yr}${yr==='2'?'nd':yr==='3'?'rd':'th'} Year</h4><div class="tbl-wrap"><table class="tt-table"><thead><tr><th>Day/Hr</th>${HOURS.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+  DAYS.forEach(d=>{
+    html+=`<tr><td style="font-weight:700">${d.slice(0,3)}</td>`;
+    HOURS.forEach(h=>{
+      const c=tt[d]?.[h];
+      html+=`<td style="cursor:pointer" onclick="editCell('${yr}','${d}','${h}')">${c?`<b>${c.code}</b><br><span style="font-size:9px;color:var(--muted)">${c.name}</span>`:'–'}</td>`;
+    });
+    html+=`</tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  return html;
+}
+window.editCell=function(yr,day,hr){
+  if(currentRole!=='hod') return;
+  const c=ttData[yr]?.[day]?.[hr]||{};
+  openModal(`<h3>Edit – ${day} ${hr}</h3>
+    <div class="form-group"><label>Subject Code</label><input id="ec_code" value="${c.code||''}" placeholder="e.g. CS2301"/></div>
+    <div class="form-group"><label>Subject Name</label><input id="ec_name" value="${c.name||''}" placeholder="e.g. Data Structures"/></div>
+    <div class="form-group"><label>Staff Name</label><input id="ec_staff" value="${c.staff||''}" placeholder="e.g. d.suganthi"/></div>
+    <button class="btn btn-primary" onclick="saveTTCell('${yr}','${day}','${hr}')">Save</button>`);
+};
+window.saveTTCell=function(yr,day,hr){
+  if(!ttData[yr]) ttData[yr]={};
+  if(!ttData[yr][day]) ttData[yr][day]={};
+  ttData[yr][day][hr]={
+    code:document.getElementById('ec_code').value,
+    name:document.getElementById('ec_name').value,
+    staff:document.getElementById('ec_staff').value
+  };
+  ls('tt',ttData);
+  closeModal();
+  showToast('Timetable updated!');
+  document.getElementById('ttContent').innerHTML=buildTTTable(yr);
+};
+
+// ════════════════════════════════════════════
+//  STUDENT IAT
+// ════════════════════════════════════════════
+function showStudentIAT(num){
+  prevScreen=currentRole;
+  document.getElementById('stdIatTitle').textContent=`IAT – ${num} Marks`;
+  const body=document.getElementById('stdIatBody');
+  const yr=currentRegno.startsWith('731724')?'2':currentRegno.startsWith('731723')?'3':'4';
+  const subs=SUBJECTS[yr];
+  const key=`iat${num}_${yr}`;
+  const data=iatData[key]||{};
+  const myMarks=data[currentRegno]||{};
+  let html=`<div class="card"><h4>IAT – ${num} | ${currentUser}</h4><div class="tbl-wrap"><table>
+    <thead><tr><th>Subject</th><th>Code</th><th>Marks</th><th>Status</th></tr></thead><tbody>`;
+  subs.forEach(s=>{
+    const m=myMarks[s.code]||'–';
+    const pass=m!=='–'&&Number(m)>=12;
+    html+=`<tr><td>${s.name}</td><td>${s.code}</td><td><b>${m}/30</b></td><td>${m!=='–'?`<span class="tag ${pass?'tag-pass':'tag-fail'}">${pass?'Pass':'Fail'}</span>`:'–'}</td></tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  body.innerHTML=html;
+  showScreen('std-iat');
+}
+
+// ════════════════════════════════════════════
+//  STAFF ATTENDANCE
+// ════════════════════════════════════════════
+function showStaffAttendance(){
+  prevScreen='staff';
+  const body=document.getElementById('staffAttBody');
+  const today=new Date().toISOString().split('T')[0];
+  body.innerHTML=`
+  <div class="card">
+    <p class="section-title">Select Year</p>
+    <div class="chip-row" id="attYrChip">
+      <div class="chip sel" onclick="setAttYr('2',this)">2nd Year</div>
+      <div class="chip" onclick="setAttYr('3',this)">3rd Year</div>
+      <div class="chip" onclick="setAttYr('4',this)">4th Year</div>
+    </div>
+    <p class="section-title">Session</p>
+    <div class="chip-row" id="attSesChip">
+      <div class="chip sel" onclick="setAttSes('morning',this)">Morning</div>
+      <div class="chip" onclick="setAttSes('afternoon',this)">Afternoon</div>
+    </div>
+    <div class="form-group"><label>Date</label><input type="date" id="attDate" value="${today}"/></div>
+  </div>
+  <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Search student…" oninput="filterAttList(this.value)"/></div>
+  <div id="attList"></div>
+  <button class="btn btn-primary" style="margin-top:8px" onclick="submitAtt()"><i class="fas fa-check"></i> Submit Attendance</button>
+  <div class="card" style="margin-top:16px">
+    <h4>Calendar View</h4>
+    <div id="attCal"></div>
+  </div>
+  <div style="margin-top:16px">
+    <button class="btn" style="background:var(--card);border:1.5px solid var(--border);color:var(--text);margin-bottom:8px" onclick="showAddStudentModal()"><i class="fas fa-user-plus"></i> Add Student</button>
+  </div>`;
+  window._attYr='2'; window._attSes='morning';
+  renderAttList();
+  renderCal();
+  showScreen('staff-att');
+}
+window.setAttYr=function(yr,el){
+  document.querySelectorAll('#attYrChip .chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+  window._attYr=yr; renderAttList();
+};
+window.setAttSes=function(ses,el){
+  document.querySelectorAll('#attSesChip .chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+  window._attSes=ses; renderAttList();
+};
+function renderAttList(){
+  const yr=window._attYr||'2';
+  const stList=STUDENTS[yr]||[];
+  const body=document.getElementById('attList');
+  if(!body) return;
+  body.innerHTML=stList.map((s,i)=>`
+  <div class="att-item" id="ai_${s.id}">
+    <div class="att-info"><div class="att-name">${s.name}</div><div class="att-sub">${s.id} | CSE ${yr}${yr==='2'?'nd':yr==='3'?'rd':'th'} Year</div></div>
+    <div class="att-actions">
+      <button class="att-btn active-p" id="ab_P_${s.id}" onclick="setStatus('${s.id}','P')">P</button>
+      <button class="att-btn" id="ab_A_${s.id}" onclick="setStatus('${s.id}','A')">A</button>
+      <button class="att-btn" id="ab_OD_${s.id}" onclick="setStatus('${s.id}','OD')">OD</button>
+    </div>
+  </div>`).join('');
+  window._attStatus={};
+  stList.forEach(s=>{ window._attStatus[s.id]='P'; });
+}
+window.setStatus=function(id,st){
+  window._attStatus[id]=st;
+  ['P','A','OD'].forEach(s=>{ const b=document.getElementById(`ab_${s}_${id}`); if(b){ b.classList.remove('active-p','active-a','active-od'); }});
+  const btn=document.getElementById(`ab_${st}_${id}`);
+  if(btn) btn.classList.add(st==='P'?'active-p':st==='A'?'active-a':'active-od');
+};
+window.filterAttList=function(q){
+  document.querySelectorAll('.att-item').forEach(el=>{
+    el.style.display=el.innerText.toLowerCase().includes(q.toLowerCase())?'flex':'none';
+  });
+};
+window.submitAtt=function(){
+  const date=document.getElementById('attDate').value;
+  const ses=window._attSes;
+  if(!attData[date]) attData[date]={};
+  const yr=window._attYr;
+  const stList=STUDENTS[yr];
+  attData[date][ses]=stList.map(s=>({id:s.id,name:s.name,yr,status:window._attStatus[s.id]||'P'}));
+  ls('att',attData);
+  showToast('Attendance submitted!');
+  renderCal();
+};
+function renderCal(){
+  const el=document.getElementById('attCal');
+  if(!el) return;
+  const now=new Date();
+  const yr=now.getFullYear(), mo=now.getMonth();
+  const first=new Date(yr,mo,1).getDay();
+  const days=new Date(yr,mo+1,0).getDate();
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let html=`<div style="font-weight:700;text-align:center;margin-bottom:8px">${months[mo]} ${yr}</div>
+  <div class="cal-grid">`;
+  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d=>html+=`<div class="cal-head">${d}</div>`);
+  for(let i=0;i<first;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const dateStr=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const rec=attData[dateStr];
+    let cls='cal-day';
+    if(rec){ const s=rec.morning||rec.afternoon; if(s){ const a=s.filter(x=>x.status==='A').length; cls+= a>0?' absent':' present'; }}
+    if(d===now.getDate()) cls+=' today';
+    html+=`<div class="${cls}">${d}</div>`;
+  }
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+window.showAddStudentModal=function(){
+  openModal(`<h3>Add Student</h3>
+    <div class="form-group"><label>Register Number</label><input id="ns_id" placeholder="731724104xxx"/></div>
+    <div class="form-group"><label>Full Name</label><input id="ns_name" placeholder="NAME"/></div>
+    <div class="form-group"><label>Year</label><select id="ns_yr"><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select></div>
+    <button class="btn btn-success" onclick="addStudent()">Add</button>`);
+};
+window.addStudent=function(){
+  const id=document.getElementById('ns_id').value.trim();
+  const name=document.getElementById('ns_name').value.trim().toUpperCase();
+  const yr=document.getElementById('ns_yr').value;
+  if(!id||!name){showToast('Fill all fields');return;}
+  STUDENTS[yr].push({id,name});
+  closeModal(); showToast('Student added!'); renderAttList();
+};
+
+// ════════════════════════════════════════════
+//  STAFF IAT
+// ════════════════════════════════════════════
+function showStaffIAT(num){
+  prevScreen='staff';
+  document.getElementById('staffIatTitle').textContent=`IAT – ${num} Marks Entry`;
+  const body=document.getElementById('staffIatBody');
+  body.innerHTML=`
+  <div class="card">
+    <p class="section-title">Select Year</p>
+    <div class="chip-row" id="iatYrChip">
+      <div class="chip sel" onclick="setIatYr('2',this,${num})">2nd Year</div>
+      <div class="chip" onclick="setIatYr('3',this,${num})">3rd Year</div>
+      <div class="chip" onclick="setIatYr('4',this,${num})">4th Year</div>
+    </div>
+    <div class="form-group"><label>Subject Code</label><input id="iat_code" placeholder="CS2301"/></div>
+    <div class="form-group"><label>Subject Name</label><input id="iat_name" placeholder="Data Structures"/></div>
+    <button class="btn" style="background:var(--card);border:1.5px solid var(--primary);color:var(--primary);margin-bottom:12px" onclick="fetchIatList(${num})"><i class="fas fa-sync"></i> Fetch Student List</button>
+  </div>
+  <div id="iatList"></div>
+  <button class="btn btn-primary" style="margin-top:8px;display:none" id="iatSubmitBtn" onclick="submitIAT(${num})"><i class="fas fa-paper-plane"></i> Submit Marks</button>`;
+  window._iatYr='2'; window._iatNum=num;
+  showScreen('staff-iat');
+}
+window.setIatYr=function(yr,el,num){
+  document.querySelectorAll('#iatYrChip .chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+  window._iatYr=yr;
+};
+window.fetchIatList=function(num){
+  const yr=window._iatYr||'2';
+  const code=document.getElementById('iat_code').value.trim();
+  const name=document.getElementById('iat_name').value.trim();
+  if(!code||!name){showToast('Enter subject code and name');return;}
+  const stList=STUDENTS[yr];
+  const key=`iat${num}_${yr}`;
+  const existing=iatData[key]||{};
+  const list=document.getElementById('iatList');
+  list.innerHTML=`<div class="card"><h4>${name} (${code}) – IAT ${num}</h4>`+
+    stList.map(s=>`<div class="iat-item">
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${s.name}</div><div style="font-size:11px;color:var(--muted)">${s.id}</div></div>
+      <div class="iat-mark"><input type="number" min="0" max="30" id="im_${s.id}" value="${existing[s.id]?.[code]||''}" placeholder="0"/></div>
+      <span style="font-size:11px;color:var(--muted)">/30</span>
+    </div>`).join('')+`</div>`;
+  document.getElementById('iatSubmitBtn').style.display='block';
+  window._iatCode=code; window._iatName=name;
+};
+window.submitIAT=function(num){
+  const yr=window._iatYr||'2';
+  const code=window._iatCode;
+  const key=`iat${num}_${yr}`;
+  if(!iatData[key]) iatData[key]={};
+  STUDENTS[yr].forEach(s=>{
+    const inp=document.getElementById(`im_${s.id}`);
+    if(!inp) return;
+    if(!iatData[key][s.id]) iatData[key][s.id]={};
+    iatData[key][s.id][code]=inp.value;
+  });
+  ls('iat',iatData);
+  showToast('Marks submitted successfully!');
+};
+
+// ════════════════════════════════════════════
+//  HOD ATTENDANCE
+// ════════════════════════════════════════════
+function showHodAttendance(){
+  prevScreen='hod';
+  const body=document.getElementById('hodAttBody');
+  body.innerHTML=`
+  <div class="card">
+    <p class="section-title">Select Year</p>
+    <div class="chip-row" id="hodAttYr">
+      <div class="chip sel" onclick="hodAttSetYr('2',this)">2nd Year</div>
+      <div class="chip" onclick="hodAttSetYr('3',this)">3rd Year</div>
+      <div class="chip" onclick="hodAttSetYr('4',this)">4th Year</div>
+    </div>
+    <p class="section-title">Session</p>
+    <div class="chip-row" id="hodAttSes">
+      <div class="chip sel" onclick="hodAttSetSes('morning',this)">Morning</div>
+      <div class="chip" onclick="hodAttSetSes('afternoon',this)">Afternoon</div>
+    </div>
+  </div>
+  <div class="card"><h4>Calendar</h4><div id="hodCal"></div></div>
+  <div class="card"><h4>Absent / On Duty – Today</h4><div id="hodAbsent"></div></div>`;
+  window._hodYr='2'; window._hodSes='morning';
+  renderHodCal(); renderHodAbsent();
+  showScreen('hod-att');
+}
+window.hodAttSetYr=function(yr,el){
+  document.querySelectorAll('#hodAttYr .chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+  window._hodYr=yr; renderHodCal(); renderHodAbsent();
+};
+window.hodAttSetSes=function(ses,el){
+  document.querySelectorAll('#hodAttSes .chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+  window._hodSes=ses; renderHodAbsent();
+};
+function renderHodCal(){
+  const el=document.getElementById('hodCal'); if(!el) return;
+  const now=new Date(),yr=now.getFullYear(),mo=now.getMonth();
+  const first=new Date(yr,mo,1).getDay(),days=new Date(yr,mo+1,0).getDate();
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let html=`<div style="font-weight:700;text-align:center;margin-bottom:8px">${months[mo]} ${yr}</div><div class="cal-grid">`;
+  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d=>html+=`<div class="cal-head">${d}</div>`);
+  for(let i=0;i<first;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const rec=attData[ds];
+    let cls='cal-day';
+    if(rec){ const s=rec.morning||rec.afternoon; if(s){ const abs=s.filter(x=>x.status==='A'&&x.yr===window._hodYr).length; cls+=abs>0?' absent':' present';}}
+    if(d===now.getDate()) cls+=' today';
+    html+=`<div class="${cls}" onclick="hodCalClick('${ds}')">${d}</div>`;
+  }
+  html+=`</div>`; el.innerHTML=html;
+}
+window.hodCalClick=function(ds){
+  const ses=window._hodSes; const yr=window._hodYr;
+  const rec=attData[ds]?.[ses]?.filter(x=>x.yr===yr)||[];
+  if(!rec.length){showToast('No records for '+ds);return;}
+  openModal(`<h3>${ds} – ${ses}</h3><div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Status</th></tr></thead><tbody>${rec.map(r=>`<tr><td>${r.name}</td><td><span class="tag ${r.status==='P'?'tag-present':r.status==='A'?'tag-absent':'tag-od'}">${r.status}</span></td></tr>`).join('')}</tbody></table></div>`);
+};
+function renderHodAbsent(){
+  const el=document.getElementById('hodAbsent'); if(!el) return;
+  const today=new Date().toISOString().split('T')[0];
+  const ses=window._hodSes||'morning'; const yr=window._hodYr||'2';
+  const rec=attData[today]?.[ses]?.filter(x=>x.yr===yr)||[];
+  const absent=rec.filter(x=>x.status==='A');
+  const od=rec.filter(x=>x.status==='OD');
+  el.innerHTML=`<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Date: ${today} | ${ses}</p>
+    <div style="margin-bottom:8px"><span class="tag tag-absent">Absent (${absent.length})</span></div>
+    <ul class="absent-list">${absent.length?absent.map(a=>`<li>${a.name} – ${a.id}</li>`).join(''):'<li>None</li>'}</ul>
+    <div style="margin:8px 0"><span class="tag tag-od">On Duty (${od.length})</span></div>
+    <ul class="absent-list">${od.length?od.map(a=>`<li>${a.name} – ${a.id}</li>`).join(''):'<li>None</li>'}</ul>`;
+}
+
+// ════════════════════════════════════════════
+//  HOD / PRINCIPAL ATTENDANCE
+// ════════════════════════════════════════════
+function showPrincipalAttendance(){
+  prevScreen='principal';
+  // reuse hod screen
+  const body=document.getElementById('hodAttBody');
+  body.innerHTML=`
+  <div class="card">
+    <p class="section-title">Select Year</p>
+    <div class="chip-row" id="hodAttYr">
+      <div class="chip sel" onclick="hodAttSetYr('2',this)">2nd Year</div>
+      <div class="chip" onclick="hodAttSetYr('3',this)">3rd Year</div>
+      <div class="chip" onclick="hodAttSetYr('4',this)">4th Year</div>
+    </div>
+    <p class="section-title">Session</p>
+    <div class="chip-row" id="hodAttSes">
+      <div class="chip sel" onclick="hodAttSetSes('morning',this)">Morning</div>
+      <div class="chip" onclick="hodAttSetSes('afternoon',this)">Afternoon</div>
+    </div>
+  </div>
+  <div class="card"><h4>Calendar</h4><div id="hodCal"></div></div>
+  <div class="card"><h4>Absent / On Duty – Today</h4><div id="hodAbsent"></div></div>`;
+  window._hodYr='2'; window._hodSes='morning';
+  renderHodCal(); renderHodAbsent();
+  showScreen('hod-att');
+}
+
+// ════════════════════════════════════════════
+//  HOD IAT VIEW
+// ════════════════════════════════════════════
+function showHodIAT(){
+  prevScreen=currentRole;
+  const body=document.getElementById('hodIatBody');
+  let html=`<div class="chip-row" id="hodIatYr">
+    <div class="chip sel" onclick="renderHodIATReport('2',1,this)">2nd Yr IAT1</div>
+    <div class="chip" onclick="renderHodIATReport('2',2,this)">2nd Yr IAT2</div>
+    <div class="chip" onclick="renderHodIATReport('3',1,this)">3rd Yr IAT1</div>
+    <div class="chip" onclick="renderHodIATReport('4',1,this)">4th Yr IAT1</div>
+  </div><div id="hodIatContent"></div>`;
+  body.innerHTML=html;
+  renderHodIATReport('2',1,document.querySelector('#hodIatYr .chip'));
+  showScreen('hod-iat');
+}
+window.renderHodIATReport=function(yr,num,el){
+  if(el){document.querySelectorAll('#hodIatYr .chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+  const key=`iat${num}_${yr}`;
+  const data=iatData[key]||{};
+  const subs=SUBJECTS[yr];
+  const stList=STUDENTS[yr];
+  const content=document.getElementById('hodIatContent');
+  let passCount=0,failCount=0;
+  let html=`<div class="card"><h4>CSE ${yr}${yr==='2'?'nd':yr==='3'?'rd':'th'} Year – IAT ${num}</h4>
+  <div class="tbl-wrap"><table>
+  <thead><tr><th>ID</th><th>Name</th>${subs.map(s=>`<th>${s.code}</th>`).join('')}<th>Status</th></tr></thead><tbody>`;
+  stList.forEach(s=>{
+    const marks=data[s.id]||{};
+    const vals=subs.map(sub=>Number(marks[sub.code])||0);
+    const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
+    const pass=avg>=12; if(pass)passCount++;else failCount++;
+    html+=`<tr><td>${s.id}</td><td>${s.name}</td>${subs.map(sub=>`<td>${marks[sub.code]||'–'}</td>`).join('')}<td><span class="tag ${pass?'tag-pass':'tag-fail'}">${pass?'Pass':'Fail'}</span></td></tr>`;
+  });
+  html+=`</tbody></table></div></div>
+  <div class="stat-row">
+    <div class="stat-box"><div class="sv" style="color:#2e7d32">${passCount}</div><div class="sl">Pass</div></div>
+    <div class="stat-box"><div class="sv" style="color:#c62828">${failCount}</div><div class="sl">Fail</div></div>
+    <div class="stat-box"><div class="sv">${stList.length}</div><div class="sl">Total</div></div>
+  </div>`;
+  content.innerHTML=html;
+};
+
+// ════════════════════════════════════════════
+//  REPORT PAGE
+// ════════════════════════════════════════════
+function showReport(){
+  prevScreen=currentRole;
+  const body=document.getElementById('reportBody');
+  const today=new Date().toISOString().split('T')[0];
+  let allAbsent=[];
+  ['morning','afternoon'].forEach(ses=>{
+    const rec=attData[today]?.[ses]||[];
+    rec.forEach(r=>{ if(r.status==='A') allAbsent.push({...r,ses}); });
+  });
+  // stats
+  let totalS=STUDENTS['2'].length+STUDENTS['3'].length+STUDENTS['4'].length;
+  let presentToday=totalS-allAbsent.length;
+  // bar chart data mock
+  const yr2p=Math.round(Math.random()*20+70);
+  const yr3p=Math.round(Math.random()*20+70);
+  const yr4p=Math.round(Math.random()*20+70);
+
+  body.innerHTML=`
+  <div class="stat-row">
+    <div class="stat-box"><div class="sv">${totalS}</div><div class="sl">Total</div></div>
+    <div class="stat-box"><div class="sv" style="color:#2e7d32">${presentToday}</div><div class="sl">Present</div></div>
+    <div class="stat-box"><div class="sv" style="color:#c62828">${allAbsent.length}</div><div class="sl">Absent</div></div>
+  </div>
+  <div class="card">
+    <h4>Attendance % by Year</h4>
+    <div class="bar-wrap">
+      <div class="bar-row"><div class="bar-label">2nd Yr</div><div class="bar-track"><div class="bar-fill" style="width:${yr2p}%;background:#1565c0"></div></div><div class="bar-val">${yr2p}%</div></div>
+      <div class="bar-row"><div class="bar-label">3rd Yr</div><div class="bar-track"><div class="bar-fill" style="width:${yr3p}%;background:#2e7d32"></div></div><div class="bar-val">${yr3p}%</div></div>
+      <div class="bar-row"><div class="bar-label">4th Yr</div><div class="bar-track"><div class="bar-fill" style="width:${yr4p}%;background:#ff6f00"></div></div><div class="bar-val">${yr4p}%</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h4>Today's Absent List (${today})</h4>
+    ${allAbsent.length?`<div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Dept</th><th>Year</th><th>Session</th></tr></thead><tbody>
+    ${allAbsent.map(a=>`<tr><td>${a.name}</td><td>CSE</td><td>${a.yr}${a.yr==='2'?'nd':a.yr==='3'?'rd':'th'}</td><td>${a.ses}</td></tr>`).join('')}
+    </tbody></table></div>`:'<p style="color:var(--muted);font-size:13px">No absences recorded today.</p>'}
+  </div>
+  <div class="card">
+    <h4><i class="fas fa-envelope" style="color:var(--primary)"></i> Email Report</h4>
+    <div class="form-group" style="margin-top:10px"><label>To Email</label><input type="email" id="toEmail" placeholder="hod@mpnmjec.ac.in"/></div>
+    <button class="btn btn-primary" onclick="sendEmailReport()"><i class="fas fa-paper-plane"></i> Send via Gmail</button>
+  </div>`;
+  showScreen('report');
+}
+window.sendEmailReport=function(){
+  const to=document.getElementById('toEmail').value;
+  const today=new Date().toISOString().split('T')[0];
+  let allAbsent=[];
+  ['morning','afternoon'].forEach(ses=>{ const rec=attData[today]?.[ses]||[]; rec.forEach(r=>{ if(r.status==='A') allAbsent.push(r.name); }); });
+  const body=encodeURIComponent(`MPNMJEC Attendance Report – ${today}\n\nAbsent Students:\n${allAbsent.join('\n')||'None'}\n\nSent from MPNMJEC Attendance System`);
+  const subject=encodeURIComponent(`Attendance Report ${today}`);
+  window.open(`mailto:${to}?subject=${subject}&body=${body}`,'_blank');
+};
+
+// ════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════
+function showSettings(){
+  prevScreen=currentRole;
+  const body=document.getElementById('settingsBody');
+  const gmail=ls('gmail_'+currentUser)||'';
+  body.innerHTML=`
+  <div class="card">
+    <div class="settings-row">
+      <div><div class="settings-label">Name</div><div class="settings-sub">${currentRole==='student'?currentUser:currentUser.toUpperCase()}</div></div>
+    </div>
+    ${currentRole==='student'?`<div class="settings-row"><div><div class="settings-label">Register Number</div><div class="settings-sub">${currentRegno}</div></div></div>`:''}
+    <div class="settings-row">
+      <div><div class="settings-label">Department</div><div class="settings-sub">CSE</div></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">Role</div><div class="settings-sub">${currentRole.charAt(0).toUpperCase()+currentRole.slice(1)}</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="form-group"><label>Gmail ID</label><input type="email" id="gmailInput" value="${gmail}" placeholder="you@gmail.com"/></div>
+    <button class="btn btn-primary" onclick="saveGmail()">Save Profile</button>
+  </div>
+  <div class="card">
+    <div class="settings-row">
+      <div><div class="settings-label">Dark Mode</div><div class="settings-sub">Switch theme</div></div>
+      <label class="toggle"><input type="checkbox" id="darkToggle" ${darkMode?'checked':''} onchange="toggleDark(this)"/><span class="toggle-slider"></span></label>
+    </div>
+  </div>
+  <div class="card">
+    <button class="btn btn-danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>`;
+  showScreen('settings');
+}
+window.saveGmail=function(){
+  ls('gmail_'+currentUser,document.getElementById('gmailInput').value);
+  showToast('Profile saved!');
+};
+window.toggleDark=function(el){
+  darkMode=el.checked;
+  ls('dark',darkMode);
+  document.documentElement.setAttribute('data-theme',darkMode?'dark':'');
+  if(!darkMode) document.documentElement.removeAttribute('data-theme');
+};
+window.doLogout=function(){
+  currentRole=''; currentUser=''; currentRegno='';
+  document.getElementById('loginForm').style.display='none';
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('inUser').value='';
+  document.getElementById('inPass').value='';
+  showScreen('login');
+};
+
+// ════════════════════════════════════════════
+//  MODAL & TOAST
+// ════════════════════════════════════════════
+function openModal(html){
+  document.getElementById('modalBox').innerHTML=html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+window.closeModal=function(e){
+  if(!e||e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+};
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
