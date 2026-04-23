@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MPNMJEC Attendance App</title>
+    <!-- Use FontAwesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338ca;
+            --bg-color: #f3f4f6;
+            --surface-color: #ffffff;
+            --surface-variant: #f9fafb;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --present: #10b981;
+            --absent: #ef4444;
+            --od: #3b82f6;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --header-h: 60px;
+            --nav-h: 60px;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #6366f1;
+            --primary-hover: #818cf8;
+            --bg-color: #111827;
+            --surface-color: #1f2937;
+            --surface-variant: #374151;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: var(--transition);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-primary { color: var(--primary); }
+        .text-muted { color: var(--text-muted); }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 16px;
+            text-align: center;
+        }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .card {
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--surface-variant);
+            color: var(--text-main);
+            font-size: 16px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        table th, table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+        table th { background: var(--surface-variant); font-weight: bold; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* Splash Screen */
+        #splashScreen {
+            position: fixed;
+            inset: 0;
+            background: var(--surface-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        .logo-circle {
+            width: 120px; height: 120px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: white; font-size: 48px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(79, 70, 229, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+
+        /* App Layout */
+        #appHeader {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: var(--header-h);
+            background: var(--surface-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; padding: 0 15px;
+        }
+        #appHeader h2 { font-size: 16px; margin: 0; text-align: center; }
+
+        #mainContent {
+            flex: 1;
+            overflow-y: auto;
+            padding: calc(var(--header-h) + 15px) 15px calc(var(--nav-h) + 15px) 15px;
+        }
+
+        #bottomNav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: var(--nav-h);
+            background: var(--surface-color);
+            border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 12px; cursor: pointer; width: 33.33%; height: 100%;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+
+        /* Login Layout */
+        .role-tabs {
+            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+        }
+        .role-tab {
+            flex: 1 1 calc(50% - 5px);
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .role-tab.active {
+            border-color: var(--primary); color: var(--primary); background: rgba(79, 70, 229, 0.05);
+        }
+        .error-msg {
+            color: var(--danger); font-size: 14px; margin-bottom: 15px; text-align: center; display: none;
+        }
+
+        /* Dashboard specific */
+        .view-section { display: none; animation: fadeIn 0.3s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .feature-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .feature-box {
+            background: var(--surface-color); padding: 20px; border-radius: 12px; text-align: center;
+            box-shadow: var(--shadow); cursor: pointer; transition: var(--transition);
+        }
+        .feature-box:active { transform: scale(0.95); }
+        .feature-box i { font-size: 30px; color: var(--primary); margin-bottom: 10px; }
+        .feature-box div { font-weight: 600; font-size: 14px; }
+
+        .progress-circle {
+            position: relative; width: 120px; height: 120px; border-radius: 50%;
+            background: conic-gradient(var(--primary) 0deg, var(--surface-variant) 0deg);
+            display: flex; justify-content: center; align-items: center; margin: 0 auto 20px auto;
+        }
+        .progress-circle::after {
+            content: ""; position: absolute; width: 90px; height: 90px;
+            background: var(--surface-color); border-radius: 50%;
+        }
+        .progress-value {
+            position: relative; z-index: 1; font-size: 24px; font-weight: bold; color: var(--primary);
+        }
+
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block;}
+        .badge-present { background: rgba(16, 185, 129, 0.1); color: var(--present);  }
+        .badge-absent { background: rgba(239, 68, 68, 0.1); color: var(--absent);  }
+        .badge-od { background: rgba(59, 130, 246, 0.1); color: var(--od);  }
+
+        .att-picker {
+            padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);
+            background: var(--surface-color); color: var(--text-main); outline: none; font-weight: bold;
+        }
+        .att-picker.p { border-color: var(--present); color: var(--present); }
+        .att-picker.a { border-color: var(--absent); color: var(--absent); }
+        .att-picker.od { border-color: var(--od); color: var(--od); }
+        
+        .mark-input { width: 60px; padding: 5px; text-align: center; border: 1px solid var(--border-color); border-radius: 4px; background:var(--surface-color); color:var(--text-main);}
+
+        .theme-toggle {
+            display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color);
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="logo-circle"><i class="fa-solid fa-graduation-cap"></i></div>
+        <h2 class="text-center" style="margin-bottom: 10px; padding: 0 20px;">M.P. NACHIMUTHU M. JAGANADHAN<br>ENGINEERING COLLEGE</h2>
+        <p class="text-muted text-center" style="font-size: 14px;">Student Attendance System</p>
+    </div>
+
+    <!-- App Header -->
+    <header id="appHeader" class="hidden">
+        <div>
+            <h2>MPNMJEC Attendance</h2>
+            <p style="font-size: 10px; text-align:center; color: var(--text-muted); margin:0;">Erode-Chennimalai Rd, Tamil Nadu 638112</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="hidden">
+        
+        <!-- Login View -->
+        <div id="view-login" class="view-section active">
+            <div class="card" style="margin-top: 20px;">
+                <h3 class="text-center" style="margin-bottom: 20px;">What is your role?</h3>
+                <div class="role-tabs">
+                    <div class="role-tab active" data-role="student">Student</div>
+                    <div class="role-tab" data-role="staff">Staff</div>
+                    <div class="role-tab" data-role="hod">HOD</div>
+                    <div class="role-tab" data-role="principal">Principal</div>
+                </div>
+
+                <div class="error-msg" id="loginError"></div>
+
+                <div class="input-group">
+                    <label id="lblUsername">Register Number</label>
+                    <input type="text" id="inUsername" placeholder="Enter Registration Number">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="inPassword" placeholder="Enter Password">
+                </div>
+
+                <button class="btn" onclick="APP.login()">Login</button>
+            </div>
+        </div>
+
+        <!-- Home View -->
+        <div id="view-home" class="view-section">
+            <div class="card" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+                <div style="width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px;">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div>
+                    <h3 id="dashName">User Name</h3>
+                    <p id="dashRole" style="color: var(--text-muted); font-size: 14px;">Role</p>
+                </div>
+            </div>
+
+            <div class="feature-grid" id="dashboardGrid"></div>
+            <div id="actionContainer"></div>
+        </div>
+
+        <!-- Report View -->
+        <div id="view-report" class="view-section">
+            <h2>Daily Report</h2>
+            <div class="card" style="margin-top: 15px;">
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="reportDate">
+                </div>
+                <div class="input-group">
+                    <label>Year</label>
+                    <select id="reportYear">
+                        <option value="CSE 2nd Year">CSE 2nd Year</option>
+                        <option value="CSE 3rd Year">CSE 3rd Year</option>
+                        <option value="CSE 4th Year">CSE 4th Year</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Session</label>
+                    <select id="reportSession">
+                        <option value="Morning">Morning</option>
+                        <option value="Afternoon">Afternoon</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="APP.generateReport()">View Report</button>
+            </div>
+
+            <div id="reportResult" class="hidden card">
+                <h3>Today's Absent Students List</h3>
+                <ul id="absenteeList" style="margin: 15px 0; padding-left: 20px; color: var(--absent);"></ul>
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+                <div class="input-group">
+                    <label>To Email</label>
+                    <input type="email" id="reportEmailTo" placeholder="principal@mpnmjec.ac.in">
+                </div>
+                <button class="btn btn-outline" onclick="APP.sendEmail()"><i class="fa-solid fa-envelope"></i> Send Report</button>
+            </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="view-settings" class="view-section">
+            <h2>Settings</h2>
+            <div class="card" style="margin-top: 15px;">
+                <h3 style="margin-bottom: 20px; font-size: 16px;">Profile details</h3>
+                <div class="input-group">
+                    <label>ID / Username</label>
+                    <input type="text" id="setUserId" readonly>
+                </div>
+                <div class="input-group">
+                    <label>Name</label>
+                    <input type="text" id="setUserName" readonly>
+                </div>
+                <div class="input-group" id="setDeptGroup">
+                    <label>Department</label>
+                    <input type="text" value="CSE" readonly>
+                </div>
+                <div class="input-group hidden" id="setYearGroup">
+                    <label>Year</label>
+                    <input type="text" id="setYear" readonly>
+                </div>
+                <div class="input-group">
+                    <label>Gmail ID</label>
+                    <input type="email" id="setGmail" placeholder="auto-filled@gmail.com">
+                </div>
+                <button class="btn btn-outline" style="margin-bottom: 20px;" onclick="APP.saveProfile()">Save Profile</button>
+
+                <div class="theme-toggle">
+                    <span style="font-weight: 600;">Dark Mode</span>
+                    <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 28px;">
+                        <input type="checkbox" id="themeToggle" onchange="APP.toggleTheme(this.checked)" style="opacity: 0; width: 0; height: 0;">
+                        <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px;">
+                            <span id="sliderDot" style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                        </span>
+                    </label>
+                </div>
+
+                <button class="btn" style="background: var(--danger); margin-top: 20px;" onclick="APP.logout()">Logout</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="bottomNav" class="hidden">
+        <div class="nav-item active" data-tab="home" onclick="APP.switchTab('home')">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" data-tab="report" onclick="APP.switchTab('report')">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>Report</span>
+        </div>
+        <div class="nav-item" data-tab="settings" onclick="APP.switchTab('settings')">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </div>
+    </nav>
+
+<script>
+// ==================== DATA LAYER ====================
+const USERS = {
+    staff: ['d.suganthi', 's.raghul', 'n.ashok kumar', 'k.n.sivakumar', 'b.yuva raj', 'k.singaravelan', 's.dineshkumar', 'a.nooralshaba', 'k.r.mohanapriya'],
+    hod: 'k.n.sivakumar',
+    principal: 'dr.ramesh'
+};
+
+const RAW_STUDENTS = {
+    'CSE 2nd Year': [
+        { id: '731724104001', name: 'ABBU G YUVARAJ' }, { id: '731724104002', name: 'ABINAYA S' },
+        { id: '731724104003', name: 'ABINAYA V' }, { id: '731724104004', name: 'ARAVINDHAN K' },
+        { id: '731724104005', name: 'ARCHANA J' }, { id: '731724104006', name: 'AYESHA REENA S' },
+        { id: '731724104007', name: 'BHARANI P' }, { id: '731724104009', name: 'DEEPA K' },
+        { id: '731724104010', name: 'DEEPIKA K' }, { id: '731724104011', name: 'DEVADHARSHINI B' },
+        { id: '731724104012', name: 'ELAMATHI V R' }, { id: '731724104013', name: 'GAYATHRI K' },
+        { id: '731724104014', name: 'GNANAKANNAN K' }, { id: '731724104015', name: 'GOKUL PRASAD K' },
+        { id: '731724104016', name: 'GUNARANJANI A' }, { id: '731724104017', name: 'GUNASREE S' },
+        { id: '731724104018', name: 'INDHUMATHI K' }, { id: '731724104019', name: 'JAYAKUMAR J' },
+        { id: '731724104020', name: 'KAVINPRIYAN M' }, { id: '731724104021', name: 'KAVITHA P' },
+        { id: '731724104022', name: 'KAVYA K' }, { id: '731724104023', name: 'KRISHNASAMY K' },
+        { id: '731724104024', name: 'MAHALAKSHMI K' }, { id: '731724104025', name: 'MALAR VIZHI N' },
+        { id: '731724104026', name: 'MUTHULA E' }, { id: '731724104027', name: 'MONIKA S' },
+        { id: '731724104028', name: 'MYTHILI M' }, { id: '731724104029', name: 'NANDHINI R' },
+        { id: '731724104030', name: 'PAVITHRA B' }, { id: '731724104031', name: 'PONRAJ P' },
+        { id: '731724104032', name: 'POOJASHREE P' }, { id: '731724104033', name: 'PRAKASH V' },
+        { id: '731724104034', name: 'PRIYADHARSHINI C' }, { id: '731724104035', name: 'SABANA S' },
+        { id: '731724104036', name: 'SABARISH P' }, { id: '731724104037', name: 'SABARISHANKAR K' },
+        { id: '731724104038', name: 'SADHISH P' }, { id: '731724104039', name: 'SATHISH M' },
+        { id: '731724104040', name: 'SAUBAL B' }, { id: '731724104042', name: 'SHARMILA A' },
+        { id: '731724104043', name: 'SHOBANA B S' }, { id: '731724104044', name: 'SRIJA V' },
+        { id: '731724104045', name: 'SUTHESH M' }, { id: '731724104046', name: 'THAVAGAR T' },
+        { id: '731724104047', name: 'THENNARASU G' }, { id: '731724104048', name: 'VAASHINI S' },
+        { id: '731724104049', name: 'VIDHYA V' }, { id: '731724104050', name: 'VIMAL S' },
+        { id: '731724104051', name: 'YAZHINI' }, { id: '731724104052', name: 'YOGESHWARI G' },
+        { id: '731724104053', name: 'YUKESH M' }
+    ],
+    'CSE 3rd Year': [
+        { id: '731723104001', name: 'YUVARAJ' }, { id: '731723104002', name: 'ABINA' },
+        { id: '731723104003', name: 'ANAYA V' }, { id: '731723104004', name: 'ARAHAN' }
+    ],
+    'CSE 4th Year': [
+        { id: '731722104001', name: 'ROJA' }, { id: '731722104002', name: 'POOJA' },
+        { id: '731722104003', name: 'RAJU' }, { id: '731722104004', name: 'MANHA' }
+    ]
+};
+
+const DB = {
+    init: () => {
+        if(!localStorage.getItem('mpnmj_db_v2')) {
+            let data = {
+                students: RAW_STUDENTS,
+                attendance: {}, // date_session_year -> { id: status }
+                timetable: {}, // year -> { day: Array(8) }
+                marks: {}, // iat_year -> { id: { subCode: mark } }
+                subjectCache: {} // iat_year -> { subCode: subName }
+            };
+            
+            // Default blank Timetable
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            for(let yr in RAW_STUDENTS) {
+                data.timetable[yr] = {};
+                days.forEach(d => {
+                    data.timetable[yr][d] = Array(8).fill({name: '-', code: '-', staff: '-'});
+                });
+            }
+            localStorage.setItem('mpnmj_db_v2', JSON.stringify(data));
+        }
+    },
+    get: () => JSON.parse(localStorage.getItem('mpnmj_db_v2')),
+    set: (data) => localStorage.setItem('mpnmj_db_v2', JSON.stringify(data)),
+    
+    saveAttendance: (date, session, year, attData) => {
+        let db = DB.get();
+        db.attendance[`${date}_${session}_${year}`] = attData;
+        DB.set(db);
+    },
+    saveMarks: (iat, year, subCode, subName, marksObj) => {
+        let db = DB.get();
+        let key = `${iat}_${year}`;
+        if(!db.marks[key]) db.marks[key] = {};
+        if(!db.subjectCache[key]) db.subjectCache[key] = {};
+        
+        db.subjectCache[key][subCode] = subName;
+        for(let id in marksObj) {
+            if(!db.marks[key][id]) db.marks[key][id] = {};
+            db.marks[key][id][subCode] = marksObj[id];
+        }
+        DB.set(db);
+    },
+    saveTimetable: (year, ttData) => {
+        let db = DB.get();
+        db.timetable[year] = ttData;
+        DB.set(db);
+    }
+};
+
+// ==================== APP CONTROLLER ====================
+const APP = {
+    user: null,
+    role: 'student',
+
+    init: () => {
+        DB.init();
+        document.getElementById('reportDate').valueAsDate = new Date();
+        
+        // Splash Transition
+        setTimeout(() => {
+            document.getElementById('splashScreen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.add('hidden');
+                document.getElementById('appHeader').classList.remove('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                
+                const session = localStorage.getItem('mpnmj_session_v2');
+                if (session) {
+                    APP.user = JSON.parse(session);
+                    APP.postLogin();
+                }
+            }, 500);
+        }, 2200);
+
+        // Role Tabs
+        document.querySelectorAll('.role-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                APP.role = e.target.getAttribute('data-role');
+                
+                const lbl = document.getElementById('lblUsername');
+                const inp = document.getElementById('inUsername');
+                if (APP.role === 'student') {
+                    lbl.textContent = 'Register Number';
+                    inp.placeholder = 'Enter Registration Number';
+                } else {
+                    lbl.textContent = 'Username';
+                    inp.placeholder = 'Enter Username';
+                }
+            });
+        });
+    },
+
+    showError: (msg) => {
+        const err = document.getElementById('loginError');
+        err.textContent = msg; err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 3000);
+    },
+
+    login: () => {
+        const id = document.getElementById('inUsername').value.trim().toLowerCase();
+        const pass = document.getElementById('inPassword').value;
+        const db = DB.get();
+        let matched = null;
+
+        if (APP.role === 'student') {
+            for (let yr in db.students) {
+                let check = db.students[yr].find(s => s.id === id);
+                if (check && pass === 'cc2cse') {
+                    matched = { ...check, role: 'student', year: yr, dept: 'CSE' };
+                    break;
+                }
+            }
+            if(!matched) return APP.showError("Invalid Register Number or Password");
+        } 
+        else if (APP.role === 'staff') {
+            if (USERS.staff.includes(id) && pass === '235689') {
+                matched = { id: id, name: id.toUpperCase(), role: 'staff' };
+            } else return APP.showError("Invalid Username or Password");
+        } 
+        else if (APP.role === 'hod') {
+            if (id === USERS.hod && pass === 'hod@cse') {
+                matched = { id: id, name: 'HOD CSE', role: 'hod' };
+            } else return APP.showError("Invalid HOD Credentials");
+        } 
+        else if (APP.role === 'principal') {
+            if (id === USERS.principal && pass === 'mpnmj@cse') {
+                matched = { id: id, name: 'DR. RAMESH (PRINCIPAL)', role: 'principal' };
+            } else return APP.showError("Invalid Principal Credentials");
+        }
+
+        if (matched) {
+            APP.user = matched;
+            APP.user.gmail = `${matched.id}@gmail.com`; // default auto
+            localStorage.setItem('mpnmj_session_v2', JSON.stringify(matched));
+            document.getElementById('inUsername').value = '';
+            document.getElementById('inPassword').value = '';
+            APP.postLogin();
+        }
+    },
+
+    logout: () => {
+        localStorage.removeItem('mpnmj_session_v2');
+        APP.user = null;
+        document.getElementById('view-settings').classList.remove('active');
+        document.getElementById('view-login').classList.add('active');
+        document.getElementById('bottomNav').classList.add('hidden');
+        document.getElementById('actionContainer').innerHTML = '';
+    },
+
+    switchTab: (tabId) => {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        document.getElementById(`view-${tabId}`).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelector(`.nav-item[data-tab="${tabId}"]`).classList.add('active');
+    },
+
+    toggleTheme: (isDark) => {
+        if(isDark) document.body.setAttribute('data-theme', 'dark');
+        else document.body.removeAttribute('data-theme');
+        document.getElementById('sliderDot').style.transform = isDark ? 'translateX(22px)' : 'translateX(0)';
+    },
+
+    postLogin: () => {
+        APP.switchTab('home');
+        document.getElementById('bottomNav').classList.remove('hidden');
+        document.getElementById('dashName').textContent = APP.user.name;
+        document.getElementById('dashRole').textContent = APP.user.role.toUpperCase();
+
+        // Populate settings
+        document.getElementById('setUserId').value = APP.user.id;
+        document.getElementById('setUserName').value = APP.user.name;
+        document.getElementById('setGmail').value = APP.user.gmail;
+        
+        if(APP.user.role === 'student') {
+            document.getElementById('setYearGroup').classList.remove('hidden');
+            document.getElementById('setYear').value = APP.user.year;
+        } else {
+            document.getElementById('setYearGroup').classList.add('hidden');
+        }
+
+        APP.renderDashboard();
+    },
+
+    saveProfile: () => {
+        APP.user.gmail = document.getElementById('setGmail').value;
+        localStorage.setItem('mpnmj_session_v2', JSON.stringify(APP.user));
+        alert('Profile Saved!');
+    },
+
+    renderDashboard: () => {
+        const grid = document.getElementById('dashboardGrid');
+        const role = APP.user.role;
+        let html = '';
+
+        if (role === 'student') {
+            html += `
+                <div class="feature-box" onclick="FEATURES.studAtt()"><i class="fa-solid fa-chart-pie"></i><div>Attendance</div></div>
+                <div class="feature-box" onclick="FEATURES.studTt()"><i class="fa-solid fa-calendar-days"></i><div>Time Table</div></div>
+                <div class="feature-box" onclick="FEATURES.studIat('1')"><i class="fa-solid fa-file-pen"></i><div>IAT-1</div></div>
+                <div class="feature-box" onclick="FEATURES.studIat('2')"><i class="fa-solid fa-file-pen"></i><div>IAT-2</div></div>
+            `;
+        } else if (role === 'staff') {
+            html += `
+                <div class="feature-box" onclick="FEATURES.staffAtt()"><i class="fa-solid fa-clipboard-user"></i><div>Attendance</div></div>
+                <div class="feature-box" onclick="FEATURES.studTt()"><i class="fa-solid fa-calendar-days"></i><div>Time Table</div></div>
+                <div class="feature-box" onclick="FEATURES.staffIat('1')"><i class="fa-solid fa-file-pen"></i><div>IAT-1</div></div>
+                <div class="feature-box" onclick="FEATURES.staffIat('2')"><i class="fa-solid fa-file-pen"></i><div>IAT-2</div></div>
+            `;
+        } else if (role === 'hod') {
+            html += `
+                <div class="feature-box" onclick="FEATURES.hodAtt()"><i class="fa-solid fa-chart-line"></i><div>Attendance</div></div>
+                <div class="feature-box" onclick="FEATURES.hodTt()"><i class="fa-solid fa-calendar-days"></i><div>Time Table</div></div>
+                <div class="feature-box" onclick="FEATURES.globalIat('1')"><i class="fa-solid fa-file-invoice"></i><div>IAT-1 Report</div></div>
+                <div class="feature-box" onclick="FEATURES.globalIat('2')"><i class="fa-solid fa-file-invoice"></i><div>IAT-2 Report</div></div>
+            `;
+        } else if (role === 'principal') {
+             html += `
+                <div class="feature-box" onclick="FEATURES.hodAtt(true)"><i class="fa-solid fa-chart-bar"></i><div>Campus Attendance</div></div>
+                <div class="feature-box" onclick="FEATURES.studTt()"><i class="fa-solid fa-calendar-days"></i><div>View Timetable</div></div>
+                <div class="feature-box" onclick="FEATURES.globalIat('1')"><i class="fa-solid fa-file-contract"></i><div>IAT-1 Global Report</div></div>
+                <div class="feature-box" onclick="FEATURES.globalIat('2')"><i class="fa-solid fa-file-contract"></i><div>IAT-2 Global Report</div></div>
+            `;
+        }
+        grid.innerHTML = html;
+        document.getElementById('actionContainer').innerHTML = '';
+    },
+
+    // ----- REPORTS PAGE SHARED -----
+    generateReport: () => {
+        const d = document.getElementById('reportDate').value;
+        const y = document.getElementById('reportYear').value;
+        const s = document.getElementById('reportSession').value;
+        
+        const db = DB.get();
+        const data = db.attendance[`${d}_${s}_${y}`] || {};
+        const students = db.students[y];
+        
+        const list = document.getElementById('absenteeList');
+        list.innerHTML = '';
+        let count = 0;
+        students.forEach(st => {
+            if(data[st.id] === 'A') {
+                count++;
+                list.innerHTML += `<li>${st.id} - ${st.name}</li>`;
+            }
+        });
+        if(count === 0) list.innerHTML = `<li style="color:var(--text-main); list-style:none;">No absentees!</li>`;
+        
+        document.getElementById('reportEmailTo').value = APP.user.gmail || '';
+        document.getElementById('reportResult').classList.remove('hidden');
+    },
+    sendEmail: () => {
+        let items = '';
+        document.querySelectorAll('#absenteeList li').forEach(l => items += l.textContent + '%0D%0A');
+        const to = document.getElementById('reportEmailTo').value;
+        const body = `Respected Sir/Madam,%0D%0A%0D%0AHere is the absent list:%0D%0A${items}%0D%0A%0D%0ARegards,%0D%0A${APP.user.name}`;
+        window.location.href = `mailto:${to}?subject=Absentee Report&body=${body}`;
+    }
+};
+
+// ==================== FEATURES LAYER ====================
+const FEATURES = {
+    scrollToCode: () => { setTimeout(() => document.getElementById('actionContainer').scrollIntoView({behavior: 'smooth'}), 100); },
+    
+    // --- STUDENT ---
+    studAtt: () => {
+        const db = DB.get();
+        let p=0, a=0, od=0, tot=0;
+        let absentDates = []; let odDates = [];
+        for(let key in db.attendance) {
+            if(key.includes(APP.user.year) && db.attendance[key][APP.user.id]) {
+                tot++;
+                let v = db.attendance[key][APP.user.id];
+                let dtStr = key.split('_')[0] + " " + key.split('_')[1];
+                if(v==='P') p++; 
+                else if(v==='A') { a++; absentDates.push(dtStr); }
+                else if(v==='OD') { od++; odDates.push(dtStr); }
+            }
+        }
+        if(tot===0){ p=10; a=0; od=0; tot=10;} // placeholder if empty
+        let pct = Math.round((p/tot)*100);
+
+        let html = `
+        <div class="card">
+            <h3>Attendance Outline</h3>
+            <div class="progress-circle" style="margin-top:20px; background: conic-gradient(var(--primary) ${pct*3.6}deg, var(--surface-variant) 0deg);">
+                <span class="progress-value">${pct}%</span>
+            </div>
+            <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                <span class="badge badge-present">P: ${p}</span> <span class="badge badge-absent">A: ${a}</span> <span class="badge badge-od">OD: ${od}</span>
+            </div>
+        </div>
+        <div class="card">
+            <h4>Absent Dates</h4><ul style="padding-left:20px; color:var(--danger); font-size:14px;">${absentDates.map(x=>`<li>${x}</li>`).join('') || '<li style="color:var(--text-main);">None</li>'}</ul>
+            <h4 style="margin-top:10px;">On Duty Dates</h4><ul style="padding-left:20px; color:var(--od); font-size:14px;">${odDates.map(x=>`<li>${x}</li>`).join('') || '<li style="color:var(--text-main);">None</li>'}</ul>
+        </div>`;
+        document.getElementById('actionContainer').innerHTML = html;
+        FEATURES.scrollToCode();
+    },
+
+    studTt: () => {
+        let yrSelector = '';
+        if(APP.user.role !== 'student') {
+            yrSelector = `<div class="input-group"><label>Select Year</label><select id="ttvYear" onchange="FEATURES._renderTt(this.value)"><option>CSE 2nd Year</option><option>CSE 3rd Year</option><option>CSE 4th Year</option></select></div>`;
+        }
+        document.getElementById('actionContainer').innerHTML = `<div class="card"><h3>Timetable</h3>${yrSelector}<div id="ttvWrap"></div></div>`;
+        FEATURES._renderTt(APP.user.role === 'student' ? APP.user.year : 'CSE 2nd Year');
+        FEATURES.scrollToCode();
+    },
+    _renderTt: (year) => {
+        const tt = DB.get().timetable[year];
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        let html = `<div class="table-responsive"><table style="font-size:12px; min-width:800px;"><tr><th>Day</th>`;
+        for(let i=1;i<=8;i++) html += `<th>H${i}</th>`; html += `</tr>`;
+        days.forEach(d => {
+            html += `<tr><th>${d}</th>`;
+            tt[d].forEach(cell => {
+                html += `<td><div style="font-weight:bold;">${cell.name}</div><div style="color:var(--text-muted);">${cell.code}</div><div style="color:var(--primary); font-size:10px;">${cell.staff}</div></td>`;
+            });
+            html += `</tr>`;
+        });
+        html += `</table></div>`;
+        document.getElementById('ttvWrap').innerHTML = html;
+    },
+
+    studIat: (iat) => {
+        const db = DB.get();
+        const mks = db.marks[`${iat}_${APP.user.year}`]?.[APP.user.id] || {};
+        const cache = db.subjectCache[`${iat}_${APP.user.year}`] || {};
+        
+        let html = `<div class="card"><h3>IAT-${iat} Records</h3><div class="table-responsive" style="margin-top:10px;"><table><tr><th>Sub Code</th><th>Sub Name</th><th>Mark</th></tr>`;
+        let c = 0;
+        for(let subCode in mks) {
+            c++;
+            html += `<tr><td>${subCode}</td><td>${cache[subCode]||'-'}</td><td>${mks[subCode]}</td></tr>`;
+        }
+        if(c===0) html += `<tr><td colspan="3" class="text-center">No marks uploaded yet</td></tr>`;
+        html += `</table></div></div>`;
+        document.getElementById('actionContainer').innerHTML = html;
+        FEATURES.scrollToCode();
+    },
+
+    // --- STAFF ---
+    staffAtt: () => {
+        let html = `
+        <div class="card">
+            <h3>Mark Attendance</h3>
+            <div class="input-group" style="margin-top:15px;">
+                <label>Year</label>
+                <select id="sAttYear">
+                    <option value="CSE 2nd Year">CSE 2nd Year</option>
+                    <option value="CSE 3rd Year">CSE 3rd Year</option>
+                    <option value="CSE 4th Year">CSE 4th Year</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Date</label> <input type="date" id="sAttDate">
+            </div>
+            <div class="input-group">
+                <label>Session</label>
+                <select id="sAttSess"><option>Morning</option><option>Afternoon</option></select>
+            </div>
+            <button class="btn" onclick="FEATURES._renderStaffAttList()">Load List</button>
+        </div><div id="staffAttListContainer"></div>`;
+        document.getElementById('actionContainer').innerHTML = html;
+        document.getElementById('sAttDate').valueAsDate = new Date();
+        FEATURES.scrollToCode();
+    },
+    _renderStaffAttList: () => {
+        const y = document.getElementById('sAttYear').value;
+        const d = document.getElementById('sAttDate').value;
+        const s = document.getElementById('sAttSess').value;
+        const db = DB.get();
+        const exist = db.attendance[`${d}_${s}_${y}`] || {};
+        const stds = db.students[y];
+
+        let html = `<div class="card"><h4>${y} | ${s}</h4>
+        <input type="text" id="attSearch" placeholder="Search ID/Name..." style="width:100%; padding:8px; margin:10px 0; border:1px solid var(--border-color); border-radius:4px; font-size:14px;" onkeyup="FEATURES._filterAttList()">
+        <div style="margin-top:10px;" id="attRowsWrap">`;
+        stds.forEach(st => {
+            let cur = exist[st.id] || 'P';
+            html += `
+            <div class="att-row" data-search="${st.id} ${st.name.toLowerCase()}" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                <div>
+                    <div style="font-weight:600; font-size:14px;">${st.name}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">${st.id}</div>
+                </div>
+                <div>
+                    <select class="att-picker ${cur.toLowerCase()}" data-id="${st.id}" onchange="this.className='att-picker '+this.value.toLowerCase()">
+                        <option value="P" ${cur==='P'?'selected':''}>Present</option>
+                        <option value="A" ${cur==='A'?'selected':''}>Absent</option>
+                        <option value="OD" ${cur==='OD'?'selected':''}>On Duty</option>
+                    </select>
+                </div>
+            </div>`;
+        });
+        html += `</div><button class="btn" style="margin-top:15px;" onclick="FEATURES._saveStaffAtt()">Submit To Database</button></div>`;
+        document.getElementById('staffAttListContainer').innerHTML = html;
+    },
+    _filterAttList: () => {
+        let q = document.getElementById('attSearch').value.toLowerCase();
+        document.querySelectorAll('.att-row').forEach(row => {
+            row.style.display = row.getAttribute('data-search').includes(q) ? 'flex' : 'none';
+        });
+    },
+    _saveStaffAtt: () => {
+        const y = document.getElementById('sAttYear').value;
+        const d = document.getElementById('sAttDate').value;
+        const s = document.getElementById('sAttSess').value;
+        let dataObj = {};
+        document.querySelectorAll('.att-picker').forEach(el => dataObj[el.getAttribute('data-id')] = el.value);
+        DB.saveAttendance(d, s, y, dataObj);
+        alert("Attendance Recorded and synced to database.");
+    },
+
+    staffIat: (iat) => {
+        let html = `
+        <div class="card">
+            <h3>IAT-${iat} Upload</h3>
+            <div class="input-group" style="margin-top:15px;">
+                <label>Select Year</label>
+                <select id="sIatYear"><option>CSE 2nd Year</option><option>CSE 3rd Year</option><option>CSE 4th Year</option></select>
+            </div>
+            <div class="input-group">
+                <label>Subject Code</label><input type="text" id="sIatCode" placeholder="e.g. CS302">
+            </div>
+            <div class="input-group">
+                <label>Subject Name</label><input type="text" id="sIatName" placeholder="e.g. Data Structures">
+            </div>
+            <button class="btn" onclick="FEATURES._loadStaffIatList('${iat}')">Fetch Student List</button>
+        </div><div id="staffIatListContainer"></div>`;
+        document.getElementById('actionContainer').innerHTML = html;
+        FEATURES.scrollToCode();
+    },
+    _loadStaffIatList: (iat) => {
+        const y = document.getElementById('sIatYear').value;
+        const code = document.getElementById('sIatCode').value.trim();
+        const name = document.getElementById('sIatName').value.trim();
+        if(!code || !name) return alert("Fill subject details");
+
+        const db = DB.get();
+        const curMarks = db.marks[`${iat}_${y}`] || {};
+        let html = `<div class="card"><h4>${y} | ${code}</h4>
+        <div class="table-responsive" style="margin-top:10px;"><table><tr><th>ID</th><th>Name</th><th>Mark</th></tr>`;
+        db.students[y].forEach(st => {
+            let m = curMarks[st.id]?.[code] || '';
+            html += `<tr><td>${st.id}</td><td>${st.name}</td><td><input type="number" class="mark-input mk-${iat}" data-id="${st.id}" value="${m}" placeholder="0"></td></tr>`;
+        });
+        html += `</table></div><button class="btn" style="margin-top:15px;" onclick="FEATURES._saveIatList('${iat}','${y}','${code}','${name}')">Submit Marks</button></div>`;
+        document.getElementById('staffIatListContainer').innerHTML = html;
+    },
+    _saveIatList: (iat, y, code, name) => {
+        let obj = {};
+        let pass=0, fail=0;
+        document.querySelectorAll(`.mk-${iat}`).forEach(el => {
+            let m = parseInt(el.value);
+            if(!isNaN(m)) {
+                obj[el.getAttribute('data-id')] = m;
+                if(m >= 35) pass++; else fail++;
+            }
+        });
+        DB.saveMarks(iat, y, code, name, obj);
+        
+        let summary = `No of Pass: ${pass}\nNo of Fail: ${fail}`;
+        alert(`Saved successfully!\n\n${summary}`);
+    },
+
+    // --- HOD ---
+    hodAtt: (isReadOnly = false) => {
+        let html = `
+        <div class="card">
+            <h3>Attendance Review</h3>
+            <div class="input-group" style="margin-top:15px;">
+                <label>Year</label>
+                <select id="hAttYear"><option>CSE 2nd Year</option><option>CSE 3rd Year</option><option>CSE 4th Year</option></select>
+            </div>
+            <div class="input-group"><label>Date</label><input type="date" id="hAttDate"></div>
+            <div class="input-group"><label>Session</label><select id="hAttSess"><option>Morning</option><option>Afternoon</option></select></div>
+            <button class="btn" onclick="FEATURES._loadHodAtt()">View Register</button>
+        </div><div id="hodAttList"></div>`;
+        document.getElementById('actionContainer').innerHTML = html;
+        document.getElementById('hAttDate').valueAsDate = new Date();
+        FEATURES.scrollToCode();
+    },
+    _loadHodAtt: () => {
+        const y = document.getElementById('hAttYear').value;
+        const d = document.getElementById('hAttDate').value;
+        const s = document.getElementById('hAttSess').value;
+        const db = DB.get();
+        const exist = db.attendance[`${d}_${s}_${y}`];
+        if(!exist) {
+            document.getElementById('hodAttList').innerHTML = `<div class="card text-center">No Data Submitted</div>`;
+            return;
+        }
+
+        let abs=[],  ods=[];
+        db.students[y].forEach(st => {
+            if(exist[st.id]==='A') abs.push(st);
+            if(exist[st.id]==='OD') ods.push(st);
+        });
+
+        document.getElementById('hodAttList').innerHTML = `
+        <div class="card">
+            <h4 style="color:var(--absent);">Absentees (${abs.length})</h4>
+            <ul style="padding-left:15px; margin-top:5px; font-size:14px; margin-bottom:15px;">
+                ${abs.map(x=>`<li>${x.id} - ${x.name}</li>`).join('') || '<li>None</li>'}
+            </ul>
+            <h4 style="color:var(--od);">On Duty (${ods.length})</h4>
+            <ul style="padding-left:15px; margin-top:5px; font-size:14px;">
+                ${ods.map(x=>`<li>${x.id} - ${x.name}</li>`).join('') || '<li>None</li>'}
+            </ul>
+        </div>`;
+    },
+
+    hodTt: () => {
+        let html = `
+        <div class="card">
+            <h3>Manage Timetable</h3>
+            <div class="input-group">
+                <label>Select Year to Update</label>
+                <select id="editTtYear" onchange="FEATURES._renderEditTt()">
+                    <option>CSE 2nd Year</option>
+                    <option>CSE 3rd Year</option>
+                    <option>CSE 4th Year</option>
+                </select>
+            </div>
+        </div><div id="editTtWrap"></div>`;
+        document.getElementById('actionContainer').innerHTML = html;
+        FEATURES._renderEditTt();
+        FEATURES.scrollToCode();
+    },
+    _renderEditTt: () => {
+        const y = document.getElementById('editTtYear').value;
+        const tt = DB.get().timetable[y];
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        let html = `<div class="card table-responsive"><table style="font-size:12px; min-width:1400px;"><tr><th>Day</th>`;
+        for(let i=1;i<=8;i++) html += `<th>Hour ${i}</th>`; html += `</tr>`;
+        
+        days.forEach(d => {
+            html += `<tr><th>${d}</th>`;
+            for(let i=0; i<8; i++) {
+                let cell = tt[d][i];
+                html += `<td>
+                    <input type="text" id="tt_${d}_${i}_n" value="${cell.name}" placeholder="Sub Name" style="width:100%; border:1px solid #ccc; font-size:11px; margin-bottom:2px;">
+                    <input type="text" id="tt_${d}_${i}_c" value="${cell.code}" placeholder="Code" style="width:100%; border:1px solid #ccc; font-size:11px; margin-bottom:2px;">
+                    <select id="tt_${d}_${i}_s" style="width:100%; border:1px solid #ccc; font-size:11px;">
+                        <option value="-">-</option>
+                        ${USERS.staff.map(st => `<option value="${st}" ${cell.staff===st?'selected':''}>${st}</option>`).join('')}
+                    </select>
+                </td>`;
+            }
+            html += `</tr>`;
+        });
+        html += `</table><button class="btn" style="margin-top:15px;" onclick="FEATURES._saveTt()">Submit Changes</button></div>`;
+        document.getElementById('editTtWrap').innerHTML = html;
+    },
+    _saveTt: () => {
+        const y = document.getElementById('editTtYear').value;
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        let updated = {};
+        days.forEach(d => {
+            updated[d] = [];
+            for(let i=0; i<8; i++){
+                updated[d].push({
+                    name: document.getElementById(`tt_${d}_${i}_n`).value,
+                    code: document.getElementById(`tt_${d}_${i}_c`).value,
+                    staff: document.getElementById(`tt_${d}_${i}_s`).value
+                });
+            }
+        });
+        DB.saveTimetable(y, updated);
+        alert('Timetable globally updated!');
+    },
+
+    globalIat: (iat) => {
+        let html = `
+        <div class="card">
+            <h3>IAT-${iat} Overall Report</h3>
+            <div class="input-group">
+                <label>Year</label>
+                <select id="globalIatYear" onchange="FEATURES._renderGlobalIat('${iat}')">
+                    <option>CSE 2nd Year</option>
+                    <option>CSE 3rd Year</option>
+                    <option>CSE 4th Year</option>
+                </select>
+            </div>
+        </div><div id="gIatWrap"></div>`;
+        document.getElementById('actionContainer').innerHTML = html;
+        FEATURES._renderGlobalIat(iat);
+        FEATURES.scrollToCode();
+    },
+    _renderGlobalIat: (iat) => {
+        const y = document.getElementById('globalIatYear').value;
+        const db = DB.get();
+        const stds = db.students[y];
+        const mdata = db.marks[`${iat}_${y}`] || {};
+        const scache = db.subjectCache[`${iat}_${y}`] || {};
+        
+        let html = `<div class="card table-responsive"><table><tr><th>ID</th><th>Name</th><th>Year</th><th>Subject Codes & Name</th><th>Mark</th><th>Pass/Fail</th></tr>`;
+        
+        let totPass=0, totFail=0;
+        stds.forEach(st => {
+            if(mdata[st.id]) {
+                for(let code in mdata[st.id]) {
+                    let m = mdata[st.id][code];
+                    let isP = m>=35;
+                    if(isP) totPass++; else totFail++;
+                    html += `<tr>
+                        <td>${st.id}</td><td>${st.name}</td><td>${y}</td>
+                        <td>${code} - ${scache[code]}</td><td>${m}</td>
+                        <td style="color:${isP?'var(--primary)':'var(--danger)'}; font-weight:bold;">${isP?'Pass':'Fail'}</td>
+                    </tr>`;
+                }
+            }
+        });
+        html += `</table></div>
+        <div class="card" style="display:flex; justify-content:space-around;">
+            <div style="font-weight:bold; color:var(--primary);">Overall Pass: ${totPass}</div>
+            <div style="font-weight:bold; color:var(--danger);">Overall Fail: ${totFail}</div>
+        </div>`;
+        document.getElementById('gIatWrap').innerHTML = html;
+    }
+};
+
+window.addEventListener('DOMContentLoaded', APP.init);
+</script>
+</body>
+</html>
