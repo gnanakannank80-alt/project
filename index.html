@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4361ee">
+    <title>MPNMJEC Attendance System</title>
+    <link rel="icon" href="mpnmj.png">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+</head>
+<body class="light-mode">
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="view active-view">
+        <div class="splash-content">
+            <div class="logo-container">
+                <i class="fa-solid fa-graduation-cap college-logo-icon"></i>
+            </div>
+            <h1>MPNMJEC</h1>
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login-page" class="view">
+        <div class="login-container">
+            <div class="login-header">
+                <h2>M.P. NACHIMUTHU M. JAGANADHAN ENGINEERING COLLEGE</h2>
+                <p>Erode-Chennimalai Rd, Erode, Tamil Nadu – 638112</p>
+            </div>
+            <div class="login-card">
+                <h3>Welcome Back</h3>
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="login-email" placeholder="Gmail ID">
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                    <input type="tel" id="login-mobile" placeholder="Mobile Number">
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="login-password" placeholder="Password">
+                </div>
+                <button id="sign-in-btn" class="primary-btn">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Container (Shows after login) -->
+    <div id="app-container" class="view">
+        <!-- Header (Shared) -->
+        <header class="app-header">
+            <div class="header-content">
+                <h2>M.P. NACHIMUTHU M. JAGANADHAN ENGINEERING COLLEGE</h2>
+                <p>Erode-Chennimalai Rd, Erode, Tamil Nadu – 638112</p>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Home Page -->
+            <section id="home-page" class="app-section active-section">
+                <div class="section-title">
+                    <h3><i class="fa-solid fa-layer-group"></i> Select Course</h3>
+                </div>
+                <div class="home-options">
+                    <div class="course-card" data-course="cse-2">
+                        <div class="course-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                        <h3>CSE 2nd Year</h3>
+                    </div>
+                    <div class="course-card" data-course="cse-3">
+                        <div class="course-icon"><i class="fa-solid fa-desktop"></i></div>
+                        <h3>CSE 3rd Year</h3>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Student List Page -->
+            <section id="student-list-page" class="app-section">
+                <div class="list-header">
+                    <button class="back-btn" id="list-back-btn"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h3 id="list-title">MPNMJ Student List</h3>
+                </div>
+                
+                <div class="tools-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="student-search" placeholder="Search students...">
+                    </div>
+                    <button id="add-student-btn" class="icon-btn primary-btn" title="Insert Student">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table id="student-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-table-body">
+                            <!-- Rows rendered via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="submit-bar">
+                    <div class="stats">
+                        <div class="stat-item">Total: <span id="total-students">0</span></div>
+                        <div class="stat-item text-success">Present: <span id="present-students" >0</span></div>
+                        <div class="stat-item text-danger">Absent: <span id="absent-students">0</span></div>
+                    </div>
+                    <button id="submit-attendance-btn" class="primary-btn">Submit</button>
+                </div>
+            </section>
+
+            <!-- Report Page -->
+            <section id="report-page" class="app-section">
+                <div class="section-title">
+                    <h3><i class="fa-solid fa-calendar-day"></i> Today's Report</h3>
+                    <span id="report-date" class="date-badge"></span>
+                </div>
+                
+                <div class="report-card">
+                    <h4>Absent Students List</h4>
+                    <div class="absent-list-container">
+                        <ul id="absent-list">
+                            <!-- Absentees populated via JS -->
+                        </ul>
+                        <div id="no-absentees-msg" class="empty-state hidden">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <p>Everyone is present today!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-actions">
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="report-from-email" readonly placeholder="From (Gmail ID)">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <input type="email" id="report-to-email" placeholder="To (Optional)">
+                    </div>
+                    <button id="send-report-btn" class="primary-btn"><i class="fa-solid fa-envelope-open-text"></i> Send via Gmail</button>
+                </div>
+            </section>
+
+            <!-- Settings Page -->
+            <section id="settings-page" class="app-section">
+                <div class="settings-container">
+                    <div class="section-title">
+                        <h3><i class="fa-solid fa-user-gear"></i> Profile Settings</h3>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="form-group">
+                            <label>Faculty Name</label>
+                            <input type="text" id="settings-name" placeholder="Enter Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <input type="text" id="settings-dept" placeholder="e.g. CSE">
+                        </div>
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="text" id="settings-year" placeholder="e.g. 2nd Year">
+                        </div>
+                        <div class="form-group">
+                            <label>Mobile Number</label>
+                            <input type="tel" id="settings-mobile" readonly class="readonly-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Gmail ID</label>
+                            <input type="email" id="settings-email" readonly class="readonly-input">
+                        </div>
+                        <button id="save-profile-btn" class="primary-btn">💾 Save Profile</button>
+                    </div>
+                    
+                    <div class="settings-card mt-4">
+                        <h4>Preferences</h4>
+                        <div class="theme-toggle-container">
+                            <div class="theme-label"><i class="fa-solid fa-sun"></i> Light Mode</div>
+                            <label class="switch">
+                                <input type="checkbox" id="theme-switch">
+                                <span class="slider round"></span>
+                            </label>
+                            <div class="theme-label"><i class="fa-solid fa-moon"></i> Dark Mode</div>
+                        </div>
+                    </div>
+                    
+                    <button id="logout-btn" class="danger-btn mt-4"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Sign Out</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" data-target="home-page">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item" data-target="report-page">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Report</span>
+            </a>
+            <a href="#" class="nav-item" data-target="settings-page">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add/Edit Student Modal -->
+    <div id="student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="student-modal-title">Add Student</h3>
+                <span class="close-btn" id="close-modal-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="student-index">
+                <div class="form-group">
+                    <label>ID / Reg No</label>
+                    <input type="text" id="student-id-input" placeholder="e.g. 731724104001">
+                </div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="student-name-input" placeholder="e.g. ABINAYA">
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" id="student-dept-input" value="CSE">
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="text" id="student-year-input" value="2nd Year">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-student-btn" class="primary-btn">Save Student</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>Admin Password Needed</h3>
+                <span class="close-btn" id="close-delete-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Please enter the admin password to delete this student.</p>
+                <input type="password" id="delete-password-input" class="mt-2 text-center" placeholder="Password">
+                <input type="hidden" id="delete-student-id">
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-delete-btn" class="danger-btn">Confirm Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
